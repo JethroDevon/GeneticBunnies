@@ -20,14 +20,8 @@ public class Menu{
         try{
 
             //first thing to happen base class must be initialised
-            buttons.add(new Sprite("play", "data/play.png", 1, 2));
-            buttons.add(new Sprite("saved", "data/saved.png", 1, 2));
-            buttons.add(new Sprite("instructions", "data/instructions.png", 1, 2));
-            buttons.add(new Sprite("options", "data/options.png", 1, 2));
-            buttons.add(new Sprite("highscore", "data/highscore.png", 1, 2));
-            buttons.add(new Sprite("credits", "data/credits.png", 1, 2));
-            buttons.add(new Sprite("exit", "data/exit.png", 1, 2));
-            buttons.add(new Sprite("pointer", "data/pointer.png", 1, 2));
+            buttons.add(new Sprite("run", "imgs/run.png", 1, 2));
+            buttons.add(new Sprite("pointer", "imgs/pointer.png", 1, 2));
 
             initMenu();
 
