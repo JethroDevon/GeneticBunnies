@@ -68,7 +68,7 @@ public class Menu{
 
                 if( buttons.get(x).checkCollision( buttons.get(y))){
 
-                    if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("play")){
+                    if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("run")){
 
                         return 1;
                     }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("credits")){

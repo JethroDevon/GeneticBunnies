@@ -37,8 +37,14 @@ public class Game extends Canvas implements Runnable{
     private BufferStrategy bs;
     private Graphics graphics;
 
-    //a menu class object
+    //Menu class object
     Menu options;
+
+    //Tiles will display nodes in simulation
+    Tiles tiles;
+
+    //Bunny object, the bunny is called barry
+    Bunny barry;
 
     //flag to end menu options
     boolean startFlag, menu, credits, simulation;
@@ -66,9 +72,6 @@ public class Game extends Canvas implements Runnable{
     //background of the menu
     public Image background, menuBackground, creditsImage;
 
-    //Tiles will display nodes in simulation
-    Tiles tiles;
-
     //constructor for game class
     public Game( int _W, int _H){
 
@@ -91,9 +94,10 @@ public class Game extends Canvas implements Runnable{
 
         try{
 
+            //initialise menu object bunny object and Tiles objects
             options = new Menu( WIDTH, HEIGHT);
-
-            tiles = new Tiles( 10, 20);
+            barry = new Bunny( 101, 100, 100);
+            tiles = new Tiles( 15, 15, 40);
             menuBackground = ImageIO.read( new File( "imgs/background.png"));
 
         }catch( Exception e){
@@ -115,7 +119,7 @@ public class Game extends Canvas implements Runnable{
             if( bs == null){
 
                 //use one or two layers to buffer sprites if needed
-                createBufferStrategy(0);
+                createBufferStrategy(1);
 
                 //returns buffer to canvas for draw in jpanel
                 return;
@@ -129,7 +133,17 @@ public class Game extends Canvas implements Runnable{
             System.out.println("Error in draw function of Game: " + e.toString());
         }
 
+        //Sprite operations
+        graphics.fillRect( 0, 0, WIDTH, HEIGHT);
         tiles.drawGrid(graphics);
+        graphics.drawImage( barry.nextFrame(), barry.getPosX(), barry.getPosY(), barry.getWidth(), barry.getHeight(), null);
+        barry.moveSprite();
+
+        //shows image from buffer
+        bs.show();
+
+        //clears graphics object once has been drawn to buffer to save memory leak
+        graphics.dispose();
 
         //Synchronises drawring on the screen for smoother
         //graphics bliting, try commenting out to see difference -
@@ -159,8 +173,8 @@ public class Game extends Canvas implements Runnable{
             graphics = bs.getDrawGraphics();
 
             ///////////////////////////////////////////////////////
-            //                                                   \\
-            //       MENU FUNCTIONS AND UPDATES HERE             //
+            //                                                   //
+            //          MENU FUNCTIONS AND UPDATES HERE          //
             //                                                   //
             ///////////////////////////////////////////////////////
 

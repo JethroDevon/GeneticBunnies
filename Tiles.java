@@ -2,8 +2,8 @@ import java.awt.Graphics;
 
 class Tiles extends Sprite{
 
-    //tiles across by tiles down
-    int mwidth, mheight;
+    //tiles across by tiles down, size of the tiles
+    int mwidth, mheight, tilesize;
 
     //this will store each individual tile for logic and display
     Tile[][] tiles;
@@ -11,12 +11,14 @@ class Tiles extends Sprite{
     //the kernel will allow an operation on surrounding tiles
     int[][] kernel = {{-1, -1},{ 0, -1},{ 1, -1},{-1, 0},{ 0, 0},{ 1, 0},{-1, 1},{ 0, 1},{ 1, 1}};
 
-
-    public Tiles( int map_width, int map_height) throws Exception{
+    //constructor for tiles function
+    public Tiles( int _width, int _height, int _size) throws Exception{
 
         super( "tilesheet", "imgs/tileIMGs.png", 4, 3);
-        mwidth = map_width;
-        mheight = map_height;
+
+        mwidth = _width;
+        mheight = _height;
+        tilesize = _size;
 
         try{
 
@@ -26,7 +28,10 @@ class Tiles extends Sprite{
                 for (int y = 0; y < mheight; y++) {
 
                     //get frame 25, the one with grass on it
-                     tiles[x][y] = new Tile( "grass " + String.valueOf(x + ( map_width * y)), getFrame(0));
+                    tiles[x][y] = new Tile( "grass " + String.valueOf(x + ( _width * y)), getFrame(0));
+
+                    //sets x and y positions based on width and height in relation to other
+                    tiles[x][y].setXY(x * tilesize, y * tilesize);
                 }
             }
         }catch( Exception e){
@@ -42,10 +47,8 @@ class Tiles extends Sprite{
             for(int y = 0; y < tiles[x].length; y++){
 
                 //draws graphics to pased graphics variable, each tile is being drawn here
-                gr2.drawImage( tiles[x][y].getFrame(0), tiles[x][y].getPosX(), tiles[x][y].getPosY(), tiles[x][y].getWidth()-1, tiles[x][y].getHeight()-1, null);
+                gr2.drawImage( tiles[x][y].getFrame(0), tiles[x][y].getPosX(), tiles[x][y].getPosY(), tilesize, tilesize, null);
             }
         }
     }
-
-
 }
