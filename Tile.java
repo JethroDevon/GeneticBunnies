@@ -14,11 +14,17 @@ class Tile extends Sprite{
     //this will stand in for now
     String cache;
 
+    int xtile, ytile;
+
     public Tile(String _name, BufferedImage _img) throws Exception{
 
         //super takes the tile image as an argument
         super( _name, _img);
     }
 
+    void changeTileType( String tileType, BufferedImage img){
 
+        setName( tileType);
+        replaceFrame( img, 0);
+    }
 }

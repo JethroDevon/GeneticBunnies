@@ -96,8 +96,8 @@ public class Game extends Canvas implements Runnable{
 
             //initialise menu object bunny object and Tiles objects
             options = new Menu( WIDTH, HEIGHT);
-            barry = new Bunny( 101, 100, 100);
-            tiles = new Tiles( 15, 15, 40);
+            barry = new Bunny( 101, 0, 200, 1);
+            tiles = new Tiles( 10, 10);
             menuBackground = ImageIO.read( new File( "imgs/background.png"));
 
         }catch( Exception e){
@@ -134,17 +134,20 @@ public class Game extends Canvas implements Runnable{
         }
 
         //Sprite operations
-        graphics.fillRect( 0, 0, WIDTH, HEIGHT);
+        //graphics.fillRect( 0, 0, WIDTH, HEIGHT);
         tiles.drawGrid(graphics);
         graphics.drawImage( barry.nextFrame(), barry.getPosX(), barry.getPosY(), barry.getWidth(), barry.getHeight(), null);
         barry.moveSprite();
-
+        barry.updateVision( tiles.tiles);
+        barry.priorities();
+        barry.bunnyFatigue();
+        
         //shows image from buffer
         bs.show();
 
         //clears graphics object once has been drawn to buffer to save memory leak
         graphics.dispose();
-
+        barry.pollConditions("ANGLE");
         //Synchronises drawring on the screen for smoother
         //graphics bliting, try commenting out to see difference -
         //its not so nice.

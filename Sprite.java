@@ -628,7 +628,16 @@ public class Sprite{
 		setAngle( angleTo);
 	}
 
-	//this function will set the angle to be pointing towards the sprite in args
+    //this function will set the angle to be pointing towards the sprite in args
+    public void pointToTwo( Sprite _sprite){
+
+        float angle = (float)Math.toDegrees(Math.atan2((double)(getPosY() - _sprite.getPosX()),(double)(getPosX() - _sprite.getPosX())));
+        angle = (angle + 180.0f) % 360.0f;
+        angle = 360.0f - angle;
+        setAngle( angle);
+    }
+
+	//this function will return an angle to the sprite in args
 	public double getAngleTo( Sprite _sprite){
 
 		return Math.toDegrees( Math.atan2( _sprite.getPosY() - getPosY(), _sprite.getPosX() - getPosX()));
@@ -720,6 +729,11 @@ public class Sprite{
 
 		return frameNum;
 	}
+
+  public void setFrameNumber(int num){
+
+      frameNum = num;
+  }
 
 	//setting  sprites bounds collisions
 	public void setAllBounds(int _left, int _right, int _top, int _bottom){
