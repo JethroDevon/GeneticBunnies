@@ -16,6 +16,8 @@ class Tile extends Sprite{
 
     int xtile, ytile;
 
+    String ID;
+
     public Tile(String _name, BufferedImage _img) throws Exception{
 
         //super takes the tile image as an argument
@@ -26,5 +28,10 @@ class Tile extends Sprite{
 
         setName( tileType);
         replaceFrame( img, 0);
+    }
+
+    void setID( String _id){
+
+        ID = _id;
     }
 }

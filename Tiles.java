@@ -29,8 +29,8 @@ class Tiles extends Sprite{
                 for (int y = 0; y < mheight; y++) {
 
                     //get frame 25, the one with grass on it
-                    tiles[x][y] = new Tile( "grass " + String.valueOf(x + ( _width * y)), getFrame(0));
-
+                    tiles[x][y] = new Tile( "grass", getFrame(0));
+                    tiles[x][y].setID(String.valueOf(x + ( _width * y)));
                     //give the tiles their index numbers
                     tiles[x][y].xtile = x;
                     tiles[x][y].ytile = y;
@@ -84,5 +84,15 @@ class Tiles extends Sprite{
             System.out.println("Error making sandPatch!");
         }
 
+    }
+
+    public int getWidth(){
+
+        return tilesize * mwidth;
+    }
+
+    public int getHeight(){
+
+        return tilesize * mheight;
     }
 }

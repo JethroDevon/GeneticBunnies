@@ -36,6 +36,7 @@ public class Game extends Canvas implements Runnable{
     //thses two objects are the key lelements of the clipping blitting method
     private BufferStrategy bs;
     private Graphics graphics;
+    private BunnyManager bmanager;
 
     //Menu class object
     Menu options;
@@ -78,6 +79,8 @@ public class Game extends Canvas implements Runnable{
         //the game has been started
         startFlag = true;
 
+        WIDTH = _W;
+        HEIGHT = _H;
         //adding key and mouse listener class to this window
         this.addMouseListener( new mouselisten());
         this.addMouseMotionListener( new mouseMotion());
@@ -85,7 +88,7 @@ public class Game extends Canvas implements Runnable{
         this.setFocusable( true);
 
         //allows the buffer and window to be sized to args
-        Dimension size = new Dimension( WIDTH = _W, HEIGHT = _H);
+        Dimension size = new Dimension( WIDTH, HEIGHT);
         setPreferredSize(size);
 
         //setting menu flag to default true,
@@ -96,8 +99,11 @@ public class Game extends Canvas implements Runnable{
 
             //initialise menu object bunny object and Tiles objects
             options = new Menu( WIDTH, HEIGHT);
-            barry = new Bunny( 101, 0, 200, 1);
             tiles = new Tiles( 10, 10);
+
+            //initialise the bunny manager object with number of bunnies, screen bounds and finite or infinate search space
+            bmanager = new BunnyManager( 4, tiles.getWidth(), tiles.getHeight(), true);
+
             menuBackground = ImageIO.read( new File( "imgs/background.png"));
 
         }catch( Exception e){
@@ -134,20 +140,15 @@ public class Game extends Canvas implements Runnable{
         }
 
         //Sprite operations
-        //graphics.fillRect( 0, 0, WIDTH, HEIGHT);
+        graphics.fillRect( 0, 0, WIDTH, HEIGHT);
         tiles.drawGrid(graphics);
-        graphics.drawImage( barry.nextFrame(), barry.getPosX(), barry.getPosY(), barry.getWidth(), barry.getHeight(), null);
-        barry.moveSprite();
-        barry.updateVision( tiles.tiles);
-        barry.priorities();
-        barry.bunnyFatigue();
-        
+        bmanager.bunnyFunctions(tiles.tiles, graphics);
+
         //shows image from buffer
         bs.show();
 
         //clears graphics object once has been drawn to buffer to save memory leak
-        graphics.dispose();
-        barry.pollConditions("ANGLE");
+        graphics.dispose();;
         //Synchronises drawring on the screen for smoother
         //graphics bliting, try commenting out to see difference -
         //its not so nice.
@@ -194,8 +195,6 @@ public class Game extends Canvas implements Runnable{
 
             //clears graphics object once has been drawn to buffer to save memory leak
             graphics.dispose();
-
-
 
         }catch(Exception e){
 

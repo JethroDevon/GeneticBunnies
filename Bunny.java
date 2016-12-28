@@ -10,7 +10,7 @@ class Bunny extends Sprite{
     int[][] kernel;
 
     //this bools are necissary to keep bunny aware of what he is doing
-    boolean busy, hungry, thirsty;
+    boolean busy, hungry, thirsty, alive;
     Tile collidingTile;
 
     //this is the go to sprite, the bunny will head towards this sprite if busy is set to true and go to is called
@@ -27,6 +27,9 @@ class Bunny extends Sprite{
         bunnyID = id;
         kernel = getVision();
 
+        //bunnies are alive by default
+        alive = true;
+        System.out.println( "Bunny number "+ id+ " at posX: " + bX + " posY: "+ bY + " is alive " + alive);
         //sprites are created in try catch blocks
         try{
 
@@ -128,27 +131,25 @@ class Bunny extends Sprite{
                     }
                 }
             }
-
             if(!busy){
 
-            targets.clear();
-            for (int i = 0; i < kernel.length; i++) {
+                targets.clear();
+                for (int i = 0; i < kernel.length; i++) {
 
-                //Bunny Vision X or Y to find which tiles the bunny can see
-                int bvx = collidingTile.xtile + kernel[i][0];
-                int bvy = collidingTile.ytile + kernel[i][1];
+                    //Bunny Vision X or Y to find which tiles the bunny can see
+                    int bvx = collidingTile.xtile + kernel[i][0];
+                    int bvy = collidingTile.ytile + kernel[i][1];
 
-                for (int x = 0; x < map.length; x++) {
-                    for (int y = 0; y < map[x].length; y++) {
+                    for (int x = 0; x < map.length; x++) {
+                        for (int y = 0; y < map[x].length; y++) {
 
-                        if( map[x][y].xtile == bvx && map[x][y].ytile == bvy){
+                            if( map[x][y].xtile == bvx && map[x][y].ytile == bvy){
 
-                            targets.add( map[x][y]);
+                                targets.add( map[x][y]);
+                            }
                         }
                     }
                 }
-
-            }
             }
         }catch(Exception e){
 
@@ -160,20 +161,31 @@ class Bunny extends Sprite{
     //go through whats available within range of bunny vision and determine a priority
     void priorities(){
 
+        //determine priority of needs with chances first
+        int thirstPriority = 100 - (thirst/100);
+        int hungerPriority = 100 - (hunger/1000);
 
-        ///TO-DO
+        if( thirstPriority > hungerPriority){
 
-        //have a function aware of whats present on the target list and create chances on them allow
-        //with random function args making choice - must need wandering food/towards-food water/towards-water
+            for (int i = 0; i < targets.size(); i++) {
 
+                if( targets.get(i).getName().equals("water") && thirst < 99){
 
-        //then fix eating and drinking with times and weights
+                    drink( targets.get(i));
+                    break;
+                }
+            }
+        }else{
 
+            for (int i = 0; i < targets.size(); i++) {
 
-        //towards-best-bunny towards bunny-average can wait
+                if( targets.get(i).getName().equals("grass") && hunger < 99){
 
-
-
+                    eat( targets.get(i));
+                    break;
+                }
+            }
+        }
     }
 
     //each cycle the bunny should get hungrier, thirstier and more needs will tick down
@@ -184,11 +196,13 @@ class Bunny extends Sprite{
         thirst--;
         hunger--;
         cycles++;
-        health -= ( 100 - thirst)/20 + ( 100 - hunger)/20; //dividing by five slows down death
+        health -= (thirst/100) + (hunger/1000); //dividing by five slows down death
 
         //can have this detect the cause of death 
         if( health <  0 || thirst < 0 || hunger < 0){
-            System.out.println("bunny dead :'( , lived for a total number of: " + cycles);
+
+            alive = false;
+            System.out.println( " bunny number " + bunnyID + " died");
         }
     }
 
@@ -197,33 +211,38 @@ class Bunny extends Sprite{
     void wander(){
     }
 
-    void eat(){
+    void eat( Sprite choise){
 
         if( goTo( choice)){
 
             busy = false;
-            //run eat function here
+            System.out.println("eaty");
+            thirst = 100;
+        }else{
+
+            System.out.println("finding an eaty");
         }
     }
 
     //this function tells the bunny to go and get a drink
-    void drink(){
+    void drink( Sprite choice){
 
         if( goTo( choice)){
 
             busy = false;
-            //run drink function
+            System.out.println("drinky");
+            hunger = 100;
         }else{
 
-            System.out.println( collidingTile.getName() );
+            System.out.println("finding a drinky");
         }
     }
 
     //bunny is busy until arrives at target sprite
-    boolean goTo( Sprite target){
+    boolean goTo( Sprite choice){
 
-        pointToTwo( target);
-        if( !circularCollision( target, 80)){
+        pointToTwo(choice);
+        if( !circularCollision( choice, 80)){
 
             return false;
         }

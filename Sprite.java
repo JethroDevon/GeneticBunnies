@@ -631,9 +631,9 @@ public class Sprite{
     //this function will set the angle to be pointing towards the sprite in args
     public void pointToTwo( Sprite _sprite){
 
-        float angle = (float)Math.toDegrees(Math.atan2((double)(getPosY() - _sprite.getPosX()),(double)(getPosX() - _sprite.getPosX())));
+        float angle = (float)Math.toDegrees(Math.atan2((double)( getPosY() - _sprite.getPosY()),(double)(getPosX() -  _sprite.getPosX())));
         angle = (angle + 180.0f) % 360.0f;
-        angle = 360.0f - angle;
+        System.out.println(angle);
         setAngle( angle);
     }
 
