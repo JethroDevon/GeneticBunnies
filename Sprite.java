@@ -633,7 +633,6 @@ public class Sprite{
 
         float angle = (float)Math.toDegrees(Math.atan2((double)( getPosY() - _sprite.getPosY()),(double)(getPosX() -  _sprite.getPosX())));
         angle = (angle + 180.0f) % 360.0f;
-        System.out.println(angle);
         setAngle( angle);
     }
 

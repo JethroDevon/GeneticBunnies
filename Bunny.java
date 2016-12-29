@@ -163,26 +163,29 @@ class Bunny extends Sprite{
 
         //determine priority of needs with chances first
         int thirstPriority = 100 - (thirst/100);
-        int hungerPriority = 100 - (hunger/1000);
+        int hungerPriority = 100 - (hunger/100);
 
-        if( thirstPriority > hungerPriority){
+        if( targets.size() > 0){
+            if( thirstPriority > hungerPriority){
 
-            for (int i = 0; i < targets.size(); i++) {
+                for (int i = 0; i < targets.size(); i++) {
 
-                if( targets.get(i).getName().equals("water") && thirst < 99){
+                    if( targets.get(i).getName().equals("water")){
 
-                    drink( targets.get(i));
-                    break;
+                        drink( targets.get(i));
+                        break;
+                    }
                 }
             }
-        }else{
+            if( hungerPriority > thirstPriority){
 
-            for (int i = 0; i < targets.size(); i++) {
+                for (int i = 0; i < targets.size(); i++) {
 
-                if( targets.get(i).getName().equals("grass") && hunger < 99){
+                    if( targets.size() != 0 &&  targets.get(i).getName().equals("grass")){
 
-                    eat( targets.get(i));
-                    break;
+                        eat( targets.get(i));
+                        break;
+                    }
                 }
             }
         }
@@ -216,11 +219,7 @@ class Bunny extends Sprite{
         if( goTo( choice)){
 
             busy = false;
-            System.out.println("eaty");
-            thirst = 100;
-        }else{
-
-            System.out.println("finding an eaty");
+            hunger = 100;
         }
     }
 
@@ -230,11 +229,7 @@ class Bunny extends Sprite{
         if( goTo( choice)){
 
             busy = false;
-            System.out.println("drinky");
-            hunger = 100;
-        }else{
-
-            System.out.println("finding a drinky");
+            thirst = 100;
         }
     }
 
@@ -242,12 +237,12 @@ class Bunny extends Sprite{
     boolean goTo( Sprite choice){
 
         pointToTwo(choice);
-        if( !circularCollision( choice, 80)){
+        if( !circularCollision( choice, 90)){
 
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /*/this function might a rotational matrix to return a rotated kernel based on the angle the bunny is facing

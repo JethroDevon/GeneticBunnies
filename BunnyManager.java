@@ -33,7 +33,7 @@ class BunnyManager{
 
             if( torroidal){
 
-                System.out.println("Torroidal seaerch space selected");
+                System.out.println("Torroidal search space selected");
                 infinatespace = true;
             }else{
 
@@ -126,8 +126,6 @@ class BunnyManager{
                 drawBunny( g, bunnyswarm.get(i));
                 bunnyswarm.get(i).pollConditions("ANGLE");
 
-                //track bunnies that have been wndering off
-                System.out.println(" bunny id  & position: " +  bunnyswarm.get(i).bunnyID + " X:" + bunnyswarm.get(i).getPosX() + " Y: "+ bunnyswarm.get(i).getPosX());
 
                 if( offGrid(bunnyswarm.get(i), tiles)){
                     if( finitespace){
