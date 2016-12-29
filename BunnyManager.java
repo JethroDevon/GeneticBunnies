@@ -2,6 +2,7 @@ import java.util.Random;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.awt.Graphics;
+import java.awt.Color;
 
 class BunnyManager{
 
@@ -32,9 +33,11 @@ class BunnyManager{
 
             if( torroidal){
 
+                System.out.println("Torroidal seaerch space selected");
                 infinatespace = true;
             }else{
 
+                System.out.println("Finite search space selected");
                 finitespace = true;
             }
         }catch( Exception e){
@@ -53,7 +56,7 @@ class BunnyManager{
 
         if( bun.getPosX() > WIDTH){
 
-            return 0;
+            return 2;
         }else if( bun.getPosX() < 0){
 
             return WIDTH;
@@ -65,9 +68,9 @@ class BunnyManager{
 
     int returnBunnyY( Bunny bun){
 
-        if( bun.getPosY() > HEIGHT + bun.getHeight()){
+        if( bun.getPosY() > HEIGHT -  bun.getHeight()){
 
-            return 0;
+            return 2;
         }else if( bun.getPosY() < 0){
 
             return HEIGHT;
@@ -85,12 +88,12 @@ class BunnyManager{
 
                 if( bun.checkCollision( tiles[x][y])){
 
-                    return true;
+                    return false;
                 }
             }
         }
 
-        return false;
+        return true;
     }
 
     //monitors average health of bunnies per round
@@ -107,40 +110,67 @@ class BunnyManager{
         g.drawImage( barry.nextFrame(), barry.getPosX(), barry.getPosY(), barry.getWidth(), barry.getHeight(), null);
     }
 
-    //calls all vital bunny functions
-    public void bunnyFunctions( Tile[][] tiles, Graphics g){
+    //calls all vital bunny functions returns true when all bunnies are dead
+    public boolean bunnyFunctions( Tile[][] tiles, Graphics g){
 
+        g.setColor(Color.RED);
+        g.drawRect(0,0,WIDTH,HEIGHT);
         try{
 
             for (int i = 0; i < bunnyswarm.size(); i++) {
 
+                //bunny functions called on each bunny here
                 bunnyswarm.get(i).updateVision( tiles);
                 bunnyswarm.get(i).priorities();
                 bunnyswarm.get(i).bunnyFatigue();
                 drawBunny( g, bunnyswarm.get(i));
                 bunnyswarm.get(i).pollConditions("ANGLE");
-                bunnyswarm.get(i).moveSprite();
+
+                //track bunnies that have been wndering off
+                System.out.println(" bunny id  & position: " +  bunnyswarm.get(i).bunnyID + " X:" + bunnyswarm.get(i).getPosX() + " Y: "+ bunnyswarm.get(i).getPosX());
 
                 if( offGrid(bunnyswarm.get(i), tiles)){
                     if( finitespace){
+
+                        bunnyswarm.get(i).setAngle( returnBunny( bunnyswarm.get(i)));
                     }else{
 
-                        bunnyswarm.get(i).setXY( returnBunnyX(bunnyswarm.get(i)), returnBunnyY(bunnyswarm.get(i)) );
+
+                        int bx = bunnyswarm.get(i).getPosX();
+                        int by = bunnyswarm.get(i).getPosY();
+                        if( bx < 0 || bx > WIDTH){
+
+                            bx =  returnBunnyX(bunnyswarm.get(i));
+                        }
+                        if( by < 0 || by > HEIGHT){
+
+                            by =  returnBunnyY(bunnyswarm.get(i));
+                        }
+
+                        bunnyswarm.get(i).setXY( bx, by);
                     }
                 }
+
+                //move after correction not before
+                bunnyswarm.get(i).moveSprite();
 
                 if(!bunnyswarm.get(i).alive){
 
                     deadbunnies.add( bunnyswarm.get(i));
                     bunnyswarm.remove(i);
-                }else{
-
-                    System.out.println("all bunnies dead");
                 }
             }
         }catch( Exception e){
 
             System.out.println("a dead bunny caused an out of range error" + e.toString());
         }
+
+        if( bunnyswarm.size() == 0){
+
+            System.out.println("all bunnies dead");
+            return true;
+        }
+
+        return false;
     }
 }
