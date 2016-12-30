@@ -1,5 +1,6 @@
 import java.awt.Graphics;
 import java.awt.Color;
+import java.util.ArrayList;
 
 class Tiles extends Sprite{
 
@@ -62,6 +63,34 @@ class Tiles extends Sprite{
                 gr2.drawImage( tiles[x][y].getFrame(0), tiles[x][y].getPosX(), tiles[x][y].getPosY(), tilesize, tilesize, null);
                 //tiles[x][y].drawString(gr2,tiles[x][y].getName(),0,0);
                 //gr2.drawRect( tiles[x][y].getPosX(), tiles[x][y].getPosY(), tiles[x][y].getWidth(), tiles[x][y].getHeight());
+            }
+        }
+    }
+
+    //manages bunnies eating from food recources up from tile, also manages bunny death and regrowth of food 
+    public void BunnyTileInterface( ArrayList<Bunny> bunlist){
+
+        //if the bunny is in eat mode, remove a point of food from the tile
+        for(int x = 0; x < tiles.length; x++){
+            for(int y = 0; y < tiles[x].length; y++){
+
+                for (int i = 0; i < bunlist.size(); i++){
+                    if( bunlist.get(i).choice != null && bunlist.get(i).choice.ID == tiles[x][y].ID && bunlist.get(i).hungry && bunlist.get(i).checkCollision( tiles[x][y])){
+
+                        tiles[x][y].beEaten(1);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public void showFood( Graphics g){
+
+        for(int x = 0; x < tiles.length; x++){
+            for(int y = 0; y < tiles[x].length; y++){
+
+                tiles[x][y].drawString(g, String.valueOf(tiles[x][y].food), 0, 20);
             }
         }
     }

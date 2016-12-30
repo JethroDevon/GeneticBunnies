@@ -143,7 +143,8 @@ public class Game extends Canvas implements Runnable{
         graphics.fillRect( 0, 0, WIDTH, HEIGHT);
         tiles.drawGrid(graphics);
         bmanager.bunnyFunctions(tiles.tiles, graphics);
-
+        tiles.BunnyTileInterface( bmanager.bunnyswarm);
+        tiles.showFood(graphics);
         //shows image from buffer
         bs.show();
 

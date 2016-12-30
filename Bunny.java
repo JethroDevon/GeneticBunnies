@@ -6,16 +6,14 @@ class Bunny extends Sprite{
 
     //these are the member variables that make up id number, vision catagory, amount of drink to take in, amount of food to take
     //at the end there are also bunny needs and bunny health and lifetime to store the number of cycles the bunny endured
-    int bunnyID, vision, drinktime, eattime, hunger = 10000, thirst = 1000, health = 10000, cycles;
+    int bunnyID, vision, drinktime, eattime, hunger = 1000, thirst = 1000, health = 900000, cycles, penalty;
     int[][] kernel;
-
-    //this bools are necissary to keep bunny aware of what he is doing
     boolean busy, hungry, thirsty, alive;
-    Tile collidingTile;
+    Tile collidingTile, centreOfBunnyMass, bestBunny, bestBunnyMass;
 
     //this is the go to sprite, the bunny will head towards this sprite if busy is set to true and go to is called
-    ArrayList<Sprite>targets = new ArrayList<Sprite>();
-    Sprite choice;
+    ArrayList<Tile>targets = new ArrayList<Tile>();
+    Tile choice;
 
     //constructor takes bunny id number, bunny X then Y locations, bunny is told the size of the world
     //in terms of x by y for logical reasons only, next is bunny vision type.
@@ -26,6 +24,9 @@ class Bunny extends Sprite{
         vision = v;
         bunnyID = id;
         kernel = getVision();
+
+        //position of best bunny
+        int[] pos;
 
         //bunnies are alive by default
         alive = true;
@@ -38,7 +39,8 @@ class Bunny extends Sprite{
             setAcceleration(1);
             setmaxVelocity(3);
             setVelocity(1);
-
+            eattime = 10;
+            drinktime = 10;
             addAngleCondition( 247, 292, 98, 104); //UP
             addAngleCondition( 67, 112, 120, 128);//DOWN
             addAngleCondition( 157, 202, 144, 152);//LEFT
@@ -55,6 +57,192 @@ class Bunny extends Sprite{
         }
     }
 
+    //this function is essentially the bunnies vision, anything in its field of view
+    //it will be given a choice of what to go for
+    void updateVision( Tile[][] map){
+
+        try{
+
+            collidingTile = map[0][0];
+
+            for( int x = 0; x < map.length; x++){
+                for( int y = 0; y < map[x].length; y++){
+
+                    if( this.checkCollision( map[x][y])){
+
+                        collidingTile = map[x][y];
+                        break;
+                    }
+                }
+            }
+            if(!busy){
+
+                targets.clear();
+                for (int i = 0; i < kernel.length; i++) {
+
+                    //Bunny Vision X or Y to find which tiles the bunny can see
+                    int bvx = collidingTile.xtile + kernel[i][0];
+                    int bvy = collidingTile.ytile + kernel[i][1];
+
+                    for (int x = 0; x < map.length; x++) {
+                        for (int y = 0; y < map[x].length; y++) {
+
+                            if( map[x][y].xtile == bvx && map[x][y].ytile == bvy){
+
+                                targets.add( map[x][y]);
+                            }
+                        }
+                    }
+                }
+            }
+        }catch(Exception e){
+
+            System.out.println(e.toString());
+        }
+    }
+
+    //go through whats available within range of bunny vision and determine a priority
+    void priorities(){
+
+        if( thirst >= hunger){
+
+            for (int i = 0; i < targets.size(); i++) {
+
+                if( targets.get(i).getName().equals("water")){
+
+                    drink( targets.get(i));
+                    break;
+                }
+            }
+        }
+        if( hunger >= thirst){
+            for (int i = 0; i < targets.size(); i++) {
+
+                //only if theres food will a bunny see that theres food present on the tile
+                if( targets.size() != 0 &&  targets.get(i).getName().equals("grass")  && targets.get(i).food > 0){
+
+                    eat( targets.get(i));
+                    break;
+                }
+            }
+        }
+    }
+
+    //displays bunny stats
+    void displayState( Graphics g){
+
+        g.setColor(Color.BLACK);
+        drawString(g, "ID: " + bunnyID + "H: " + health +"F: " + hunger + "T: " + thirst, -(getWidth()/2), 0);
+    }
+
+    //each cycle the bunny should get hungrier, thirstier and more needs will tick down
+    //untill they either reach zero and the bunny dies or they are topped up with eating or
+    //drinking, also, health goes down a certain amount based on how hungry or thirsty the bunny is.
+    void bunnyFatigue(){
+
+        cycles++;
+
+        int thirstTax = (1000 - thirst);
+        int hungerTax = (1000 - hunger);
+
+        //reduces health depending on whether the bunny is eating or drinking or not
+        if( hungry){
+
+            health -=  thirstTax;
+            thirst--;
+        }else if( thirsty){
+
+            health -= hungerTax;
+            hunger--;
+        }else{
+
+            health -= ( hungerTax + thirstTax);
+        }
+
+        //can have this detect the cause of death
+        if( health <  0 || thirst < 0 || hunger < 0){
+
+            alive = false;
+            System.out.println( " bunny number " + bunnyID + " died, thirst = " + thirst +  " hunger " + hunger + " health " + health);
+        }
+    }
+
+    //this function takes a few parameters that has the bunny taking
+    //a random walk through the map
+    void wander(){
+
+    }
+
+    //go to best bunny
+    public Tile bestBunny(){
+
+        return bestBunny;
+    }
+
+    //go to center of bunny mass
+    public Tile centreOfBunnyMass(){
+
+        return centreOfBunnyMass;
+    }
+
+    void eat( Sprite choice){
+
+        if( goTo( choice)){
+
+            //loop here x amount of cycles so that eating a specific amount has a specific cost on each bunny regarding
+            //time, however bunny must not pay hunger cost while eating
+            hungry = true;
+            penalty ++;
+            hunger++;
+            setAcceleration(0);
+
+            if( penalty > eattime){
+
+                penalty = 0;
+                hungry = false;
+                busy = false;
+                setAcceleration(2);
+                choice = null;
+            }
+        }
+    }
+
+    //this function tells the bunny to go and get a drink
+    void drink( Sprite choice){
+
+        if( goTo( choice)){
+
+            thirsty = true;
+            penalty++;
+            thirst++;
+            setAcceleration(0);
+
+            if( penalty > drinktime){
+
+                System.out.println("done");
+                penalty = 0;
+                thirsty = false;
+                busy = false;
+                setAcceleration(2);
+                choice = null;
+            }
+        }
+    }
+
+    //bunny is busy until arrives at target sprite
+    boolean goTo( Sprite choice){
+
+        if( !busy){
+
+            pointToTwo(choice);
+            if( !circularCollision( choice, 50)){
+
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     //this are matrices for a bunny facing north, I will have to remember how to either rotate or do four more kernels
     //in the meantime I will movmove on
@@ -111,138 +299,6 @@ class Bunny extends Sprite{
         System.out.println("Bunny vision is not being assigned properly");
         int[][] vd = {{-1, -1},{ 0, -1},{ 1, -1},{-1, 0},{ 0, 0},{ 1, 0},{-1, 1},{ 0, 1},{ 1, 1}};
         return vd;
-    }
-
-    //this function is essentially the bunnies vision, anything in its field of view
-    //it will be given a choice of what to go for
-    void updateVision( Tile[][] map){
-
-        try{
-
-            collidingTile = map[0][0];
-
-            for( int x = 0; x < map.length; x++){
-                for( int y = 0; y < map[x].length; y++){
-
-                    if( this.checkCollision( map[x][y])){
-
-                        collidingTile = map[x][y];
-                        break;
-                    }
-                }
-            }
-            if(!busy){
-
-                targets.clear();
-                for (int i = 0; i < kernel.length; i++) {
-
-                    //Bunny Vision X or Y to find which tiles the bunny can see
-                    int bvx = collidingTile.xtile + kernel[i][0];
-                    int bvy = collidingTile.ytile + kernel[i][1];
-
-                    for (int x = 0; x < map.length; x++) {
-                        for (int y = 0; y < map[x].length; y++) {
-
-                            if( map[x][y].xtile == bvx && map[x][y].ytile == bvy){
-
-                                targets.add( map[x][y]);
-                            }
-                        }
-                    }
-                }
-            }
-        }catch(Exception e){
-
-            System.out.println(e.toString());
-        }
-    }
-
-
-    //go through whats available within range of bunny vision and determine a priority
-    void priorities(){
-
-        //determine priority of needs with chances first
-        int thirstPriority = 100 - (thirst/100);
-        int hungerPriority = 100 - (hunger/100);
-
-        if( targets.size() > 0){
-            if( thirstPriority > hungerPriority){
-
-                for (int i = 0; i < targets.size(); i++) {
-
-                    if( targets.get(i).getName().equals("water")){
-
-                        drink( targets.get(i));
-                        break;
-                    }
-                }
-            }
-            if( hungerPriority > thirstPriority){
-
-                for (int i = 0; i < targets.size(); i++) {
-
-                    if( targets.size() != 0 &&  targets.get(i).getName().equals("grass")){
-
-                        eat( targets.get(i));
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    //each cycle the bunny should get hungrier, thirstier and more needs will tick down
-    //untill they either reach zero and the bunny dies or they are topped up with eating or
-    //drinking, also, health goes down a certain amount based on how hungry or thirsty the bunny is.
-    void bunnyFatigue(){
-
-        thirst--;
-        hunger--;
-        cycles++;
-        health -= (thirst/100) + (hunger/1000); //dividing by five slows down death
-
-        //can have this detect the cause of death 
-        if( health <  0 || thirst < 0 || hunger < 0){
-
-            alive = false;
-            System.out.println( " bunny number " + bunnyID + " died");
-        }
-    }
-
-    //this function takes a few parameters that has the bunny taking
-    //a random walk through the map
-    void wander(){
-    }
-
-    void eat( Sprite choise){
-
-        if( goTo( choice)){
-
-            busy = false;
-            hunger = 100;
-        }
-    }
-
-    //this function tells the bunny to go and get a drink
-    void drink( Sprite choice){
-
-        if( goTo( choice)){
-
-            busy = false;
-            thirst = 100;
-        }
-    }
-
-    //bunny is busy until arrives at target sprite
-    boolean goTo( Sprite choice){
-
-        pointToTwo(choice);
-        if( !circularCollision( choice, 90)){
-
-            return true;
-        }
-
-        return false;
     }
 
     /*/this function might a rotational matrix to return a rotated kernel based on the angle the bunny is facing

@@ -14,7 +14,7 @@ class Tile extends Sprite{
     //this will stand in for now
     String cache;
 
-    int xtile, ytile;
+    int xtile, ytile, food = 100;
 
     String ID;
 
@@ -33,5 +33,24 @@ class Tile extends Sprite{
     void setID( String _id){
 
         ID = _id;
+    }
+
+    String getID(){
+
+        return ID;
+    }
+    //this takes food from the tiles when eaten is called on them
+    int beEaten( int amount){
+
+        if( amount < food){
+
+            food -= amount;
+            return amount;
+        }else{
+
+            int temp = food;
+            food = 0;
+            return temp;
+        }
     }
 }

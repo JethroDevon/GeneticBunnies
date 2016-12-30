@@ -46,7 +46,41 @@ class BunnyManager{
         }
     }
 
-    //return bunnies back onto the search space by reversing their diriection
+    //calculate centre of bunny mass
+    public int[]centerOfBunnyMass(){
+
+        int[] pos = new int[2];
+
+        for (int i = 0; i < bunnyswarm.size(); i++) {
+
+            pos[0] += bunnyswarm.get(i).getPosX();
+            pos[1] += bunnyswarm.get(i).getPosX();
+        }
+
+        pos[0] = pos[0]/bunnyswarm.size();
+        pos[1] = pos[1]/bunnyswarm.size();
+        return pos;
+    }
+
+
+    //get the best bunny ( health + thirst + hunger)
+    public Bunny getBestBunny(){
+
+        Bunny temp = bunnyswarm.get(0);
+
+        for (int i = 0; i < bunnyswarm.size();i++) {
+
+            if( (bunnyswarm.get(i).health + bunnyswarm.get(i).thirst + bunnyswarm.get(i).hunger) >
+                (temp.health + temp.thirst + temp.hunger)){
+
+                temp = bunnyswarm.get(i);
+            }
+        }
+
+        return temp;
+    }
+
+    //return bunnies back onto the search space by reversing their direction
     float returnBunny( Bunny bun){
 
         return Math.abs((int) (bun.getAngle() + 180) % 360);
@@ -98,7 +132,7 @@ class BunnyManager{
 
     //monitors average health of bunnies per round
 
-    //keeps track of averaage bunny population size
+    //keeps track of average bunny population size
 
     //stores lifetime size of best bunny
 
@@ -125,7 +159,7 @@ class BunnyManager{
                 bunnyswarm.get(i).bunnyFatigue();
                 drawBunny( g, bunnyswarm.get(i));
                 bunnyswarm.get(i).pollConditions("ANGLE");
-
+                bunnyswarm.get(i).displayState(g);
 
                 if( offGrid(bunnyswarm.get(i), tiles)){
                     if( finitespace){
