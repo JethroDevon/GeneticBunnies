@@ -102,7 +102,7 @@ public class Game extends Canvas implements Runnable{
             tiles = new Tiles( 10, 10);
 
             //initialise the bunny manager object with number of bunnies, screen bounds and finite or infinate search space
-            bmanager = new BunnyManager( 4, tiles.getWidth(), tiles.getHeight(), true);
+            bmanager = new BunnyManager( 4, tiles.getWidth(), tiles.getHeight(), true, tiles.tiles);
 
             menuBackground = ImageIO.read( new File( "imgs/background.png"));
 
@@ -143,13 +143,14 @@ public class Game extends Canvas implements Runnable{
         graphics.fillRect( 0, 0, WIDTH, HEIGHT);
         tiles.drawGrid(graphics);
         bmanager.bunnyFunctions(tiles.tiles, graphics);
-        tiles.BunnyTileInterface( bmanager.bunnyswarm);
-        tiles.showFood(graphics);
+        tiles.showFood(graphics, bmanager.bunnyswarm, bmanager.deadbunnies);
+
         //shows image from buffer
         bs.show();
 
         //clears graphics object once has been drawn to buffer to save memory leak
-        graphics.dispose();;
+        graphics.dispose();
+
         //Synchronises drawring on the screen for smoother
         //graphics bliting, try commenting out to see difference -
         //its not so nice.

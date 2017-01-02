@@ -17,7 +17,7 @@ class BunnyManager{
     boolean infinatespace, finitespace;
 
     //first value is population second two are map dimensions last is the type of search space to use
-    public BunnyManager( int startsize, int _w, int _h, boolean torroidal){
+    public BunnyManager( int startsize, int _w, int _h, boolean torroidal, Tile[][] map){
 
         WIDTH = _w;
         HEIGHT = _h;
@@ -25,7 +25,7 @@ class BunnyManager{
         try{
             for (int i = 0; i < startsize; i++) {
 
-                bunnyswarm.add( new Bunny( bunnyswarm.size(), 0 + (int)(Math.random() * WIDTH), 0 + (int)(Math.random() * HEIGHT), 0 + (int)Math.random() +9));
+                bunnyswarm.add( new Bunny( bunnyswarm.size(), 0 + (int)(Math.random() * WIDTH), 0 + (int)(Math.random() * HEIGHT), 0, map));
 
                 //add random angle
                 bunnyswarm.get( bunnyswarm.size()-1).setAngle(0 + (Math.random() * 359));
@@ -199,7 +199,7 @@ class BunnyManager{
 
         if( bunnyswarm.size() == 0){
 
-            System.out.println("all bunnies dead");
+            //           System.out.println("all bunnies dead");
             return true;
         }
 

@@ -66,31 +66,47 @@ class Tiles extends Sprite{
             }
         }
     }
+    public void showFood( Graphics g, ArrayList<Bunny>bswarm, ArrayList<Bunny>deadbun){
 
-    //manages bunnies eating from food recources up from tile, also manages bunny death and regrowth of food 
-    public void BunnyTileInterface( ArrayList<Bunny> bunlist){
-
-        //if the bunny is in eat mode, remove a point of food from the tile
+        //shows all food on the map
         for(int x = 0; x < tiles.length; x++){
             for(int y = 0; y < tiles[x].length; y++){
 
-                for (int i = 0; i < bunlist.size(); i++){
-                    if( bunlist.get(i).choice != null && bunlist.get(i).choice.ID == tiles[x][y].ID && bunlist.get(i).hungry && bunlist.get(i).checkCollision( tiles[x][y])){
+                if(tiles[x][y].getName() == "grass" && tiles[x][y].food > 0)
+                tiles[x][y].drawString(g, String.valueOf(tiles[x][y].food), 0, 20);
+            }
+        }
 
-                        tiles[x][y].beEaten(1);
-                        break;
+        //subtracts eaten food from the map
+        for (int i = 0; i < bswarm.size(); i++) {
+            for( int f = 0; f < bswarm.get(i).eatenTiles.size(); f++){
+                for(int x = 0; x < tiles.length; x++){
+                    for(int y = 0; y < tiles[x].length; y++){
+
+                        if( bswarm.get(i).eatenTiles.get(f)!= null && tiles[x][y].checkCollision(bswarm.get(i).eatenTiles.get(f))){
+
+                            tiles[x][y].food -= 10;
+                        }
                     }
                 }
             }
+            bswarm.get(i).eatenTiles.clear();
         }
-    }
 
-    public void showFood( Graphics g){
+        //returns food onto the map from dead bunnies
+        for (int i = 0; i < deadbun.size(); i++) {
 
-        for(int x = 0; x < tiles.length; x++){
-            for(int y = 0; y < tiles[x].length; y++){
+            if(deadbun.get(i).foodEaten > 0){
+                for(int x = 0; x < tiles.length; x++){
+                    for(int y = 0; y < tiles[x].length; y++){
 
-                tiles[x][y].drawString(g, String.valueOf(tiles[x][y].food), 0, 20);
+                        if(tiles[x][y].checkCollision(deadbun.get(i))){
+
+                            tiles[x][y].food += deadbun.get(i).foodEaten;
+                            deadbun.get(i).foodEaten = 0;
+                        }
+                    }
+                }
             }
         }
     }

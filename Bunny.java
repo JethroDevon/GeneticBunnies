@@ -1,26 +1,82 @@
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.awt.Color;
+import java.util.Random;
 
 class Bunny extends Sprite{
 
     //these are the member variables that make up id number, vision catagory, amount of drink to take in, amount of food to take
     //at the end there are also bunny needs and bunny health and lifetime to store the number of cycles the bunny endured
-    int bunnyID, vision, drinktime, eattime, hunger = 1000, thirst = 1000, health = 900000, cycles, penalty;
+    int bx, by, bunnyID, vision, drinktime, eattime, grazecycles, hunger, thirst, health = 150000, cycles, penalty, foodEaten;
+
+    //when the bunny should stop considering self hungry or thristy and choose food or water over the other
+    int watercapacity, foodcapacity;
+
+    //metabolism multiplyer for speeding up movement plus deterioration
+    int metabolism;
+
+    //sight kernel for preset sight shapes
     int[][] kernel;
+
+    //this integer represents the chromosomes, 16 values represent eight xy coordinatates ( xyxyxyxyxyxyxyxy)
+    //the bunny will walk in a pattern based on these coordinates around itself
+    int[][] movement_chromosome = new int[8][2];
+
+    //similar to above, a set of values determine the bunnies vision range in terms of eigh xy pairs, just within a smaller
+    //range
+    int[][] vision_chromosome = new int[8][2];
+
+    //chromosomes for some options for the bunny such as eating and drinking times and movement speed
+    //vision shape are worked out with a chromosome that adds or subtracts from a middle range
+    int[] option_chromosome;
+
+    //some important booleans for going to food and drink logic
     boolean busy, hungry, thirsty, alive;
+
+    //I plan to implement functions that will have the bunny locate these targets
     Tile collidingTile, centreOfBunnyMass, bestBunny, bestBunnyMass;
+
+    //this array list will store the array of tiles the bunny will travel between grazing
+    ArrayList<Tile>path = new ArrayList<Tile>();
 
     //this is the go to sprite, the bunny will head towards this sprite if busy is set to true and go to is called
     ArrayList<Tile>targets = new ArrayList<Tile>();
+
+    //this array list just keeps track of the food eaten from which tile so as to subtract that amount of food from the
+    //environment, it is returned at the bunnies location after a set amount of game cycles
+    ArrayList<Tile>eatenTiles = new ArrayList<Tile>();
+
+    //tile to home in on
     Tile choice;
 
     //constructor takes bunny id number, bunny X then Y locations, bunny is told the size of the world
     //in terms of x by y for logical reasons only, next is bunny vision type.
-    public Bunny( int id, int bX, int bY, int v) throws Exception{
+    public Bunny( int id, int bX, int bY, int v, Tile[][] map) throws Exception{
 
         super( "Bunny", "imgs/rabbit.png", 11, 15);
 
+        bx = bX;
+        by = bY;
+
+        //generate random genes for the movement chromosome
+        movement_chromosome = genMovement();
+
+        //generate random genes for the vision chromosome
+
+        //generate random genes for the option chromosome
+        //(eattime, drinktime, grazecycles, metabolism, foodcapacity, watercapacity)
+        option_chromosome = genOptions();
+        genPath( map);
+
+        eattime = option_chromosome[0];
+        drinktime = option_chromosome[1];
+        grazecycles = option_chromosome[2];
+        metabolism = option_chromosome[3];
+        foodcapacity = 100 * option_chromosome[4];
+        watercapacity = 100 * option_chromosome[5];
+
+        hunger = foodcapacity;
+        thirst = watercapacity;
         vision = v;
         bunnyID = id;
         kernel = getVision();
@@ -34,13 +90,13 @@ class Bunny extends Sprite{
         //sprites are created in try catch blocks
         try{
 
-            setXY( bX, bY);
+            setXY(bx , by);
             setAngle(0);
             setAcceleration(1);
-            setmaxVelocity(3);
-            setVelocity(1);
-            eattime = 10;
-            drinktime = 10;
+            setmaxVelocity(1 * metabolism);
+            setVelocity(1 * metabolism);
+            eattime = 3;
+            drinktime = 3;
             addAngleCondition( 247, 292, 98, 104); //UP
             addAngleCondition( 67, 112, 120, 128);//DOWN
             addAngleCondition( 157, 202, 144, 152);//LEFT
@@ -51,9 +107,79 @@ class Bunny extends Sprite{
             addAngleCondition( 202, 247, 112, 120);//UPLEFT
             addAngleCondition( 112, 157, 136, 144);//DOWNLEFT
             pollConditions("ANGLE");
+
         }catch( Exception e){
 
             System.out.println(" Bunny number " + bunnyID + " Is attempting to crash the program.");
+        }
+    }
+
+    int[] genOptions(){
+
+        Random gen = new Random(System.currentTimeMillis());
+        System.out.print( " Options: ");
+        int[] temp = new int[6];
+        for (int i = 0; i < 6; i++) {
+
+            temp[i] = gen.nextInt( 9) + 1;
+            System.out.print( temp[i] + "-");
+        }
+        System.out.println();
+        return temp;
+    }
+
+    int[][] genMovement(){
+
+        Random gen = new Random(System.currentTimeMillis());
+        System.out.print("Movement: ");
+        int[][] temp = new int[8][2];
+        for (int i = 0; i < 8; i++) {
+
+            temp[i][0] =  gen.nextInt( bx) + 0;
+            temp[i][1] =  gen.nextInt( by) + 0;
+            System.out.print( bx + " x " + by + " ");
+        }
+
+        System.out.println();
+        return temp;
+    }
+
+    //generates an array list out of the movement chromosomes to create a path to travel between
+    void genPath( Tile[][] map){
+
+        try{
+
+            ArrayList<Tile>temparr = new ArrayList<Tile>();
+
+            for( int x = 0; x < map.length; x++){
+                for( int y = 0; y < map[x].length; y++){
+
+                    temparr.add( map[x][y]);
+                }
+            }
+
+            for (int i = 0; i < temparr.size(); i++) {
+
+                for (int z = 0; z < 8; z++) {
+
+                    //use any tile for now
+                    Sprite temp = new Sprite("temp","imgs/pointer.png",1,1);
+                    temp.setXY( movement_chromosome[z][0], movement_chromosome[z][1]);
+                    temp.setWH( 1 ,1);
+                    if( temparr.get(i).checkCollision( temp)){
+
+                            path.add( temparr.get(i));
+                            break;
+                    }
+                }
+            }
+
+        }catch( Exception e){
+
+            System.out.println("failed to generate a path for bunny");
+        }finally{
+
+            System.out.println(" path with " + path.size() + " nodes successfuly created");
         }
     }
 
@@ -101,38 +227,137 @@ class Bunny extends Sprite{
         }
     }
 
+    boolean grassInRange(){
+
+        for (int i = 0; i < targets.size(); i++) {
+
+            if( targets.get(i).getName() == "grass" && targets.get(i).food > 0){
+
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean waterInRange(){
+
+        for (int i = 0; i < targets.size(); i++) {
+
+            if( targets.get(i).getName() == "water"){
+
+                return true;
+            }
+        }
+        return false;
+    }
+
     //go through whats available within range of bunny vision and determine a priority
     void priorities(){
 
-        if( thirst >= hunger){
+        if(waterInRange()){
 
-            for (int i = 0; i < targets.size(); i++) {
+            gotoWater();
+        }else if(grassInRange()){
 
-                if( targets.get(i).getName().equals("water")){
-
-                    drink( targets.get(i));
-                    break;
-                }
-            }
+            gotoGrass();
         }
-        if( hunger >= thirst){
-            for (int i = 0; i < targets.size(); i++) {
+    }
 
-                //only if theres food will a bunny see that theres food present on the tile
-                if( targets.size() != 0 &&  targets.get(i).getName().equals("grass")  && targets.get(i).food > 0){
+    void gotoWater(){
 
-                    eat( targets.get(i));
-                    break;
+        thirsty = false;
+
+        if( thirst < 400)
+            if(choice == null){
+                for (int i = 0; i < targets.size(); i++) {
+
+                    if(targets.get(i).getName().equals("water")){
+
+                        choice = targets.get(i);
+                        break;
+                    }
                 }
+            }else if( choice != null &&  checkCollision(choice)){
+
+                thirsty = true;
+
+                if(penalty < drinktime && !hungry){
+
+                    penalty++;
+                    thirst+=10;
+                    setVelocity(0);
+                    setAcceleration(0);
+
+                }
+
+                if(penalty >= drinktime && !hungry){
+
+                    choice = null;
+                    thirsty = false;
+                    setVelocity(1 * metabolism);
+                    setAcceleration(2);
+                    penalty = 0;
+                }
+            }else{
+
+                goTo(choice);
             }
-        }
+    }
+
+    void gotoGrass(){
+
+        hungry = false;
+
+        if(hunger < 400)
+            if(choice == null){
+                for (int i = 0; i < targets.size(); i++) {
+
+                    if(targets.get(i).getName().equals("grass") && targets.get(i).food > 0){
+
+                        choice = targets.get(i);
+                        break;
+                    }
+                }
+            }else if( choice != null &&  checkCollision(choice)){
+
+                hungry = true;
+
+                if(penalty < eattime && !thirsty){
+
+                    penalty++;
+                    eatenTiles.add(choice);
+                    hunger+=10;
+                    foodEaten+=10;
+                    setVelocity(0);
+                    setAcceleration(0);
+
+                }
+
+                if(penalty >= eattime && !thirsty){
+
+                    choice = null;
+                    hungry = false;
+                    setVelocity(1 * metabolism);
+                    setAcceleration(2);
+                    penalty = 0;
+                }
+            }else{
+
+                goTo(choice);
+            }
     }
 
     //displays bunny stats
     void displayState( Graphics g){
 
         g.setColor(Color.BLACK);
-        drawString(g, "ID: " + bunnyID + "H: " + health +"F: " + hunger + "T: " + thirst, -(getWidth()/2), 0);
+        drawString(g, "ID: " + bunnyID + "H: " + health +"F: " + hunger + "T: " + thirst, -(getWidth()/2), 30);
+
+        //draws a rectangle over the location the bunny is trying to get to if it is trying to get somewhere
+        if(choice != null){
+
+            g.drawRect(choice.getPosX(), choice.getPosY(), 40, 40);
+        }
     }
 
     //each cycle the bunny should get hungrier, thirstier and more needs will tick down
@@ -141,22 +366,23 @@ class Bunny extends Sprite{
     void bunnyFatigue(){
 
         cycles++;
-
-        int thirstTax = (1000 - thirst);
-        int hungerTax = (1000 - hunger);
+        int thirstTax = Math.abs(400 - thirst);
+        int hungerTax = Math.abs(400 - hunger);
 
         //reduces health depending on whether the bunny is eating or drinking or not
         if( hungry){
 
-            health -=  thirstTax;
+            health -=  thirstTax * metabolism;
             thirst--;
         }else if( thirsty){
 
-            health -= hungerTax;
+            health -= hungerTax * metabolism;
             hunger--;
         }else{
 
-            health -= ( hungerTax + thirstTax);
+            health -= ( hungerTax + thirstTax) * metabolism;
+            thirst--;
+            hunger--;
         }
 
         //can have this detect the cause of death
@@ -185,50 +411,6 @@ class Bunny extends Sprite{
         return centreOfBunnyMass;
     }
 
-    void eat( Sprite choice){
-
-        if( goTo( choice)){
-
-            //loop here x amount of cycles so that eating a specific amount has a specific cost on each bunny regarding
-            //time, however bunny must not pay hunger cost while eating
-            hungry = true;
-            penalty ++;
-            hunger++;
-            setAcceleration(0);
-
-            if( penalty > eattime){
-
-                penalty = 0;
-                hungry = false;
-                busy = false;
-                setAcceleration(2);
-                choice = null;
-            }
-        }
-    }
-
-    //this function tells the bunny to go and get a drink
-    void drink( Sprite choice){
-
-        if( goTo( choice)){
-
-            thirsty = true;
-            penalty++;
-            thirst++;
-            setAcceleration(0);
-
-            if( penalty > drinktime){
-
-                System.out.println("done");
-                penalty = 0;
-                thirsty = false;
-                busy = false;
-                setAcceleration(2);
-                choice = null;
-            }
-        }
-    }
-
     //bunny is busy until arrives at target sprite
     boolean goTo( Sprite choice){
 
@@ -243,6 +425,8 @@ class Bunny extends Sprite{
 
         return false;
     }
+
+
 
     //this are matrices for a bunny facing north, I will have to remember how to either rotate or do four more kernels
     //in the meantime I will movmove on
