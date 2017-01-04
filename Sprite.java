@@ -1,48 +1,3 @@
-/*
-
-	Author: Jethro Holcroft.
-	Start Date: 16/01/2016.
-
-	The purpose of this class is to draw animated sprites that are easy to use in a game type environment, these sprites should be able to function as projectiles, pickups
-	animated caracters that are controled by the player with keys or mouse, animations in the background or effects such as explosions, buttons, scrollable text boxes or even as a splash screen.
-
-	This class will contain functions that allow detection of collisions with other objects of Sprite, returns the angle between this Sprite and other objects of type sprite
-
-	Objects of this class will contain an array of images, these will be frames for animation, integers to store height width and positions.
-
-	Each object will be initialised with a name, this is so the object can be assigned a unique ID for various reasons, it will also help identify this object in debug messages.
-
-	Comments will reference changes of state or conditions, a sub class called stateData manages these,
-	a state is the frames for an animation to loop between, the position to draw the next iteration, the width and height dimensions if they need to change,
-
-	in this case a state will these details and addState() will contain arguments that will add a new state to sprite
-	if no states are added, then only the default state will be used, the width and height of the object will be default and based on the size of the frames.
-	A condition is an angle speed or velocity with data on which frames to loop through in case the sprites condition matches one saved in the array list 'conditions',
-	'addAngle/speed/velocityCondition()' are three seperate functions that will add conditions, pollConditions() will do the checking to see if a condition has changed
-
-	it is recomended that objects of this class will be stored in array lists or singularly in a wrapper class that is likley to be used in the main application loop using an MVC style functionality, however a lone
-	object right at the start of a program can be used as a splash screen, a timer class and a start stop boolean will be included to aid extra functionality.
-
-	Emitters are particle fountains, the instructions for setting up and using are near line 1000 and the comments more or less explain how they are used, further explantions also in documentation soon to be included
-
-	an additional button and menu class will also be incuded in the sprite class along with a special constructor, this is to take advantage of some of the functionality of the sprite class to add a little
-	gui support, therefore default font variables and font loading support will also be included.
-
-	There will be a lot of debug messages and error handling, this is to help make this class easy to use.
-
-	comments will aim to explain variables and functions as though the reader is learning how to use the code, and functions and variables will be written to best describe their purpose and allow as readable code
-	as possible, however a lot of Javas paint methods and graphics functionality/overides are best loosley referenced to.
-
-	Gravity and Thrust functions have been added, if yo uchoose gravity mode a gravity angle and strength has to be set, default is zero, adding thrust acceleration will temporarily cancel gravity effects
-	and can be used for jumping or for lander style physics, setting gravity angle to be always at the center of another sprite using point to function will create a gravity well
-
-																							TO-DO:
-
-	add subclasses that will use this sprite class to create a menu button array, text buttons, consider having an inventory style menu!
-
-	add sound functionality, call in state and condition change, have sound loaded in state data
-*/
-
 import java.util.BitSet;
 import java.util.ArrayList;
 import javax.swing.JPanel;
@@ -59,6 +14,58 @@ import java.awt.image.PixelGrabber;
 import java.awt.image.RGBImageFilter;
 import java.util.Random;
 
+/*
+
+	Author: Jethro Holcroft.
+	Start Date: 16/01/2016.
+
+	The purpose of this class is to draw animated sprites that are easy to use in a game type environment, these sprites should be able to function as projectiles, pickups
+	animated caracters that are controled by the player with keys or mouse, animations in the background or effects such as explosions, buttons,
+	scrollable text boxes or even as a splash screen.
+
+	This class will contain functions that allow detection of collisions with other objects of Sprite, returns the angle between this Sprite and other objects of type sprite
+
+	Objects of this class will contain an array of images, these will be frames for animation, integers to store height width and positions.
+
+	Each object will be initialised with a name, this is so the object can be assigned a unique ID for various reasons, it will also help identify this object in debug messages.
+
+	Comments will reference changes of state or conditions, a sub class called stateData manages these,
+	a state is the frames for an animation to loop between, the position to draw the next iteration, the width and height dimensions if they need to change,
+
+	in this case a state will these details and addState() will contain arguments that will add a new state to sprite
+	if no states are added, then only the default state will be used, the width and height of the object will be default and based on the size of the frames.
+	A condition is an angle speed or velocity with data on which frames to loop through in case the sprites condition matches one saved in the array list 'conditions',
+	'addAngle/speed/velocityCondition()' are three seperate functions that will add conditions, pollConditions() will do the checking to see if a condition has changed
+
+	it is recomended that objects of this class will be stored in array lists or singularly in a wrapper class that is likley to be used in the main application 
+	loop using an MVC style functionality, however a lone
+	object right at the start of a program can be used as a splash screen, a timer class and a start stop boolean will be included to aid extra functionality.
+
+	Emitters are particle fountains, the instructions for setting up and using are near line 1000 and the comments more or less explain how they are used,
+	further explantions also in documentation soon to be included
+
+	an additional button and menu class will also be incuded in the sprite class along with a special constructor, this is to take advantage of some of the functionality 
+	of the sprite class to add a little
+	gui support, therefore default font variables and font loading support will also be included.
+
+	There will be a lot of debug messages and error handling, this is to help make this class easy to use.
+
+	comments will aim to explain variables and functions as though the reader is learning how to use the code, and functions and
+	variables will be written to best describe their purpose and allow as readable code
+	as possible, however a lot of Javas paint methods and graphics functionality/overides are best loosley referenced to.
+
+	Gravity and Thrust functions have been added, if yo uchoose gravity mode a gravity angle and strength has to be set, default is zero, 
+	adding thrust acceleration will temporarily cancel gravity effects
+	and can be used for jumping or for lander style physics, setting gravity angle to be always at the center of another sprite using point to function will create a gravity well
+
+							     
+	TO-DO:
+
+	add subclasses that will use this sprite class to create a menu button array, text buttons, consider having an inventory style menu!
+
+	add sound functionality, call in state and condition change, have sound loaded in state data
+
+*/
 
 public class Sprite{
 
@@ -106,12 +113,16 @@ public class Sprite{
 	//default font is 'serif'
 	private Font font = new Font("serif", Font.PLAIN, 30);
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// CONSTRUCTORS; Several different types of constructor for several different types of sprite, the first is a standard animated sprite, the second takes an argument that determines  //
-	//	what kind of sprite to produce based on the argument containting 'functionality'																								  //
-	//																																													  //
-	//	The second two are for plain images one takes a path to an image the other an image passed into it, this is for dynamic initialisation											  //
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//                                                                                                                                                                         //
+        //                                                          CONSTRUCTORS;                                                                                                  //
+        //                                                                                                                                                                         //
+        //                  Several different types of constructor for several different types of sprite, the first is a standard animated sprite,                                 //
+        //                               the second takes an argument that determines. What kind of sprite to produce based on the argument containting 'functionality'            //
+        //                                                                                                                                                                         //
+	//        	The second two are for plain images one takes a path to an image the other an image passed into it, this is for dynamic initialisation                     //
+        //                                                                                                                                                                         //
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//This constructor is for a standard animated sprite,
 	//constructor requires the image name in the form of a string, a path to load the image from, and the rows and columns the contact sheet is split up into.
@@ -720,19 +731,19 @@ public class Sprite{
 		g2.drawString( _text, getPosX() + _x, getPosY() + _y);
 	}
 
-	//////////////////////////////
-	//	Getters and Setters	   	//
-	//////////////////////////////
+	//////////////////////////////////
+	//	Getters and Setters   	//
+	//////////////////////////////////
 
 	public int getFrameNumber(){
 
 		return frameNum;
 	}
 
-  public void setFrameNumber(int num){
+        public void setFrameNumber(int num){
 
-      frameNum = num;
-  }
+           frameNum = num;
+	}
 
 	//setting  sprites bounds collisions
 	public void setAllBounds(int _left, int _right, int _top, int _bottom){

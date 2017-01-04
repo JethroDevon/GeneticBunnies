@@ -14,7 +14,7 @@ class BunnyManager{
     public ArrayList<Integer>populationsize = new ArrayList<Integer>();
     public ArrayList<Integer>bestbunny = new ArrayList<Integer>();
 
-    boolean infinatespace, finitespace;
+    boolean infinatespace, finitespace, extinct;
 
     //first value is population second two are map dimensions last is the type of search space to use
     public BunnyManager( int startsize, int _w, int _h, boolean torroidal, Tile[][] map){
@@ -135,8 +135,20 @@ class BunnyManager{
     //keeps track of average bunny population size
 
     //stores lifetime size of best bunny
+    public int bestLifeTime(){
 
-    //draws bunny statistic chart
+	int temp = 0;
+
+	for (int i = 0; i < deadbunnies.size() ; i++) {
+
+	    if( deadbunnies.get(i).cycles > temp){
+
+		temp = deadbunnies.get(i).cycles;
+	    }
+	}
+
+	return temp;
+    }
 
     //draws individual bunny
     public void drawBunny( Graphics g, Bunny barry){
@@ -200,6 +212,7 @@ class BunnyManager{
         if( bunnyswarm.size() == 0){
 
             //           System.out.println("all bunnies dead");
+	    extinct = true;
             return true;
         }
 

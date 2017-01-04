@@ -368,7 +368,7 @@ class Bunny extends Sprite{
 		if(penalty < thirstyness && !hungry){
 
 		    penalty++;
-		    thirst+=10;
+		    thirst = watercapacity;
 		    setVelocity(0);
 		    setAcceleration(0);
 
@@ -450,25 +450,14 @@ class Bunny extends Sprite{
     void bunnyFatigue(){
 
 	cycles++;
-	int thirstTax = Math.abs(400 - thirst);
-	int hungerTax = Math.abs(400 - hunger);
+	
+	int thirstTax = Math.abs( watercapacity - thirst);
+	int hungerTax = Math.abs( foodcapacity - hunger);
 
-	//reduces health depending on whether the bunny is eating or drinking or not
-	if( hungry){
-
-	    health -=  thirstTax * metabolism;
-	    thirst--;
-	}else if( thirsty){
-
-	    health -= hungerTax * metabolism;
-	    hunger--;
-	}else{
-
-	    health -= ( hungerTax + thirstTax) * metabolism;
-	    thirst--;
-	    hunger--;
-	}
-
+	health -= ( hungerTax + thirstTax) * metabolism;
+	thirst-=2;
+	hunger--;
+	
 	//can have this detect the cause of death
 	if( health <  0 || thirst < 0 || hunger < 0){
 
@@ -495,7 +484,7 @@ class Bunny extends Sprite{
 	if( !busy){
 
 	    pointToTwo(choice);
-	    if( !circularCollision( choice, 80)){
+	    if( !circularCollision( choice, 40)){
 
 		return true;
 	    }

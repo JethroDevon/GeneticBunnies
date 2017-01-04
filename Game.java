@@ -44,8 +44,8 @@ public class Game extends Canvas implements Runnable{
     //Tiles will display nodes in simulation
     Tiles tiles;
 
-    //Bunny object, the bunny is called barry
-    Bunny barry;
+    //this is a graph object, it should be able to display data
+    Graphs graph;
 
     //flag to end menu options
     boolean startFlag, menu, credits, simulation;
@@ -76,11 +76,12 @@ public class Game extends Canvas implements Runnable{
     //constructor for game class
     public Game( int _W, int _H){
 
+	WIDTH = _W;
+        HEIGHT = _H;
+	
         //the game has been started
         startFlag = true;
 
-        WIDTH = _W;
-        HEIGHT = _H;
         //adding key and mouse listener class to this window
         this.addMouseListener( new mouselisten());
         this.addMouseMotionListener( new mouseMotion());
@@ -94,6 +95,8 @@ public class Game extends Canvas implements Runnable{
         //setting menu flag to default true,
         //this starts draw in menu mode
         menu = true;
+
+	graph = new Graphs( Color.YELLOW, "BUNNY LIFETIME", "", "", 10, 10, 500, 300);
 
         try{
 
@@ -142,8 +145,26 @@ public class Game extends Canvas implements Runnable{
         //Sprite operations
         graphics.fillRect( 0, 0, WIDTH, HEIGHT);
         tiles.drawGrid(graphics);
-        bmanager.bunnyFunctions(tiles.tiles, graphics);
+	      	
         tiles.showFood(graphics, bmanager.bunnyswarm, bmanager.deadbunnies);
+
+	//starts a new game after recording importand bunny data
+	if( bmanager.bunnyFunctions(tiles.tiles, graphics)){
+
+	    graph.addEntry( bmanager.bestLifeTime());
+	      bmanager = new BunnyManager( 4, tiles.getWidth(), tiles.getHeight(), true, tiles.tiles);
+	    try{
+	    tiles = new Tiles( 10, 10);
+	    }catch( Exception e){
+
+		System.out.println(e.toString());
+	    }
+	}
+
+	if( direction == "UP"){
+
+	    graph.drawGraph( graphics);
+	}
 
         //shows image from buffer
         bs.show();
