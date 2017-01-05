@@ -39,9 +39,9 @@ class TestSprite extends JFrame{
     this.setLocation( screenSize.width/4,  screenSize.height/4);
 
 		//custom cursor is blank, so own cursor can be used: http://stackoverflow.com/questions/1984071/how-to-hide-cursor-in-a-swing-application
-		this.setCursor(this.getToolkit().createCustomCursor(
-            new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB), new Point(0, 0),
-            "null"));
+    	this.setCursor(this.getToolkit().createCustomCursor(
+      new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB), new Point(0, 0),
+       "null"));
 		this.pack();
 
 		this.setSize( width, height);

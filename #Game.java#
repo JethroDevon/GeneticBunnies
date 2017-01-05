@@ -103,7 +103,7 @@ public class Game extends Canvas implements Runnable{
 	ThirstDeaths = new Graphs( Color.CYAN, "THIRST DEATHS", "", "", 10, 10, 500, 300);
 	HungerDeaths = new Graphs( Color.ORANGE, "HUNGER DEATHS", "", "", 10, 10, 500, 300);
 
-	LifeBunt = new Sprite();
+	LifeBunt = new Sprite( "imgs/Food");
         try{
 
             //initialise menu object bunny object and Tiles objects

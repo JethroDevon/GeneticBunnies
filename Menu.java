@@ -21,8 +21,8 @@ public class Menu{
 
             //first thing to happen base class must be initialised
             buttons.add(new Sprite("run", "imgs/run.png", 1, 2));
-            buttons.add(new Sprite("pointer", "imgs/pointer.png", 1, 2));
-
+	    buttons.add(new Sprite("exit", "imgs/exit.png", 1, 2));
+	    buttons.add(new Sprite("pointer", "imgs/pointer.png", 1, 2));
             initMenu();
 
         }catch(Exception e){
@@ -40,9 +40,10 @@ public class Menu{
             buttons.get(x).setWH( buttons.get(x).getWidth()/2, buttons.get(x).getHeight() / 2);
 
              //sets the positions relativley to the screen, draws them a little apart also to avoid pointer clicking two at once, that distance is calculated relativley
-             buttons.get(x).setXY( (WIDTH/2) - (buttons.get(x).getWidth()/2), HEIGHT/30 + (buttons.get(x).getHeight() + HEIGHT/40 ) * (1 + x) );
+             buttons.get(x).setXY( (WIDTH/2) - (buttons.get(x).getWidth()/2), HEIGHT/60 + (buttons.get(x).getHeight() + HEIGHT/10 ) * (1 + x) );
 
     	}
+
     }
 
     public void drawMenu( Graphics gr2){
@@ -55,7 +56,7 @@ public class Menu{
                     gr2.drawImage( x.getFrame( 1), x.getPosX(), x.getPosY(), x.getWidth(), x.getHeight()-1, null);
                 }else{
 
-                    gr2.drawImage( x.getFrame( 0), x.getPosX(), x.getPosY(), x.getWidth(), x.getHeight()-1, null);
+		      gr2.drawImage( x.getFrame( 0), x.getPosX(), x.getPosY(), x.getWidth(), x.getHeight()-1, null);
                 }
             }
         }

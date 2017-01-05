@@ -6,7 +6,7 @@ import java.awt.Color;
 
 class BunnyManager{
 
-    int WIDTH, HEIGHT;
+    int WIDTH, HEIGHT, hungerdeaths, thirstdeaths, totalFoodConsumption;
 
     public ArrayList<Bunny>bunnyswarm = new ArrayList<Bunny>();
     public ArrayList<Bunny>deadbunnies = new ArrayList<Bunny>();
@@ -130,11 +130,51 @@ class BunnyManager{
         return true;
     }
 
-    //monitors average health of bunnies per round
+    //returns total amount of food consumed that round
+    public int totalFood(){
 
-    //keeps track of average bunny population size
+	int temp = 0;
 
-    //stores lifetime size of best bunny
+	for (int i = 0; i < deadbunnies.size(); i++) {
+
+	    temp += deadbunnies.get(i).totalfoodconsumed;
+	}
+
+	return temp;
+    }
+
+    //returns total thirst related deaths that round
+    public int totalThirstDeaths(){
+
+	int temp = 0;
+
+	for (int i = 0; i < deadbunnies.size(); i++) {
+
+	    if( deadbunnies.get(i).diedofthirst){
+		temp++;
+	    }
+	}
+
+	return temp;
+    }
+
+    //returns total hunger related deaths that round
+    public int totalHungerDeaths(){
+
+	int temp = 0;
+
+	for (int i = 0; i < deadbunnies.size(); i++) {
+
+	    if( deadbunnies.get(i).diedofhunger){
+		
+		temp++;
+	    }
+	}
+
+	return temp;
+    }
+
+    //returns lifetime size of best bunny
     public int bestLifeTime(){
 
 	int temp = 0;
@@ -172,6 +212,7 @@ class BunnyManager{
                 drawBunny( g, bunnyswarm.get(i));
                 bunnyswarm.get(i).pollConditions("ANGLE");
                 bunnyswarm.get(i).displayState(g);
+		bunnyswarm.get(i).showVision( g, tiles);
 
                 if( offGrid(bunnyswarm.get(i), tiles)){
                     if( finitespace){

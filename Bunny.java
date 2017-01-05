@@ -13,7 +13,7 @@ class Bunny extends Sprite{
     int watercapacity, foodcapacity, thirstyness, hungryness ,hungrynesspenalty ,thirstynesspenalty;
 
     //metabolism multiplyer for speeding up movement plus deterioration
-    int metabolism;
+    int metabolism, totalfoodconsumed;
 
     //sight kernel for preset sight shapes
     int[][] kernel;
@@ -31,7 +31,7 @@ class Bunny extends Sprite{
     int[] option_chromosome;
 
     //some important booleans for going to food and drink logic
-    boolean busy, hungry, thirsty, alive, grazing, walk;
+    boolean busy, hungry, thirsty, alive, grazing, walk, diedofthirst, diedofhunger;
 
     //I plan to implement functions that will have the bunny locate these targets
     Tile collidingTile, centreOfBunnyMass, bestBunny, bestBunnyMass;
@@ -61,6 +61,7 @@ class Bunny extends Sprite{
         by = bY;
 	bunnyID = id;
 	presentNode = 0;
+	walk = true;
 	
         //bunnies are alive by default
         alive = true;
@@ -326,7 +327,6 @@ class Bunny extends Sprite{
 		walk = true;
 	    }
 
-	    presentCycle++;
 	    return true;
 	}else{
 	    
@@ -336,13 +336,14 @@ class Bunny extends Sprite{
 
     boolean nextNode(){
 
-        pointToTwo( path.get(presentNode));
 	
-	if( circularCollision(path.get(presentNode), 450)){
+	if( checkCollision( path.get(presentNode))){
 
+	    presentCycle++;
 	    return true;
 	}else{
 
+	    pointToTwo( path.get(presentNode));
 	    return false;
 	}
     }
@@ -410,8 +411,9 @@ class Bunny extends Sprite{
 
 		    penalty++;
 		    eatenTiles.add(choice);
-		    hunger+=10;
-		    foodEaten+=10;
+		    hunger += 10;
+		    foodEaten += 10;
+		    totalfoodconsumed += 10;
 		    setVelocity(0);
 		    setAcceleration(0);
 
@@ -459,10 +461,20 @@ class Bunny extends Sprite{
 	hunger--;
 	
 	//can have this detect the cause of death
-	if( health <  0 || thirst < 0 || hunger < 0){
+	if( health <  0){
 
 	    alive = false;
-	    System.out.println( " bunny number " + bunnyID + " died, thirst = " + thirst +  " hunger " + hunger + " health " + health);
+	    System.out.println( bunnyID + " eventually died.");
+	}else if( thirst < 0){
+
+	    alive = false;
+	    diedofthirst = true;
+	    System.out.println( bunnyID + " died of thirst.");
+	}else if( hunger < 0){
+
+	    alive = false;
+	    diedofhunger = true;
+	    System.out.println( bunnyID + " died of hunger.");
 	}
     }
 
@@ -479,12 +491,12 @@ class Bunny extends Sprite{
     }
 
     //bunny is busy until arrives at target sprite
-    boolean goTo( Sprite choice){
+    boolean goTo( Tile choice){
 
 	if( !busy){
 
 	    pointToTwo(choice);
-	    if( !circularCollision( choice, 40)){
+	    if( !checkCollision( choice)){
 
 		return true;
 	    }
@@ -493,7 +505,29 @@ class Bunny extends Sprite{
 	return false;
     }
 
+    public void showVision(Graphics g, Tile[][] map){
 
+	if( selected){
+
+	    g.setColor(Color.RED);
+	      for (int i = 0; i < kernel.length; i++) {
+
+                    //Bunny Vision X or Y to find which tiles the bunny can see
+                    int bvx = collidingTile.xtile + kernel[i][0];
+                    int bvy = collidingTile.ytile + kernel[i][1];
+
+                    for (int x = 0; x < map.length; x++) {
+                        for (int y = 0; y < map[x].length; y++) {
+
+                            if( map[x][y].xtile == bvx && map[x][y].ytile == bvy){
+
+				g.drawRect( map[x][y].getPosX(), map[x][y].getPosY(), map[x][y].getWidth(), map[x][y].getHeight());
+                            }
+                        }
+                    }
+                }
+	}
+    }
 
     //this are matrices for a bunny facing north, I will have to remember how to either rotate or do four more kernels
     //in the meantime I will movmove on

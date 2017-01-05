@@ -12,6 +12,8 @@ class Graphs{
 
     //this array list stores all the data to be displayed
     ArrayList<Integer> data = new ArrayList<Integer>();
+
+    ArrayList<Integer> processedData = new ArrayList<Integer>();
     
     //title of the graph
     String title;
@@ -40,66 +42,77 @@ class Graphs{
     public void addEntry( int entry){
 
 	data.add( new Integer( entry));
+	
+	processedData.clear();
+	for (int i = 0; i < data.size(); i++) {
+
+	    processedData.add(scaleData( data.get(i)));
+	}
     }
 
     public void drawGraph( Graphics g){
 
-	if(data.size() > 1){
-	    
-	    g.setColor( Color.BLACK);
-	    g.fillRect( x , y, sizeX, sizeY);
-	    g.setColor( Color.WHITE);
-	    g.drawString( title, x + sizeX/2, y - 20);	    
-	
-	    //horizontal lines are just the height of the graph divided by ten however the vertically lines
-	    //will be the same as the number of data entries until there is ten
-	    int horizontalSpace = sizeX/10;
-	    int verticalSpace = sizeY/data.size();
-	
-	    for (int i = 0; i < sizeX; i += horizontalSpace) {
-
-		g.drawLine( x, y + i, sizeX, y + i );
-	    }
-
-	    //only draw the vertical lines if there is less than sizeX/4, other wise the graph would look bad
-	    if( data.size() < sizeX/4){
-		for (int i = 0; i < sizeY; i += verticalSpace) {
-
-		    g.drawLine( i, y, i, sizeY);
-		}
-	    }
-
-	    //the graph displayed will use the existing data to show each point based on the highest so far as at 100%
-	    if( data.size() > 0){
-
-		//gets highest point of all data for the graphs scale
-		for (int i = 0; i < data.size(); i++) {
-
-		    if( data.get(i) > scale){
-
-			scale = data.get(i);
-		    }
-		}   
-	    }
-
-	
-	    int scaleratio = sizeX/scale;
-	
-	    //create an array with a set of scaled points
-	    int[] point = new int[ data.size()];
-
-	    for (int i = 0; i < data.size(); i++) {
-
-		point[i] = scaleratio * data.get(i);
-	    }
-	
+	if(data.size() > 0){
+	    	
+	    int verticalSpace = sizeX/data.size();
+	    int range = sizeY/100;
+ 	
 	    g.setColor( color);
+	    g.drawString( title, x + sizeX/2, y + 20 );
 
-	    for (int i = 0; i < data.size() -1; i++) {
+	    for (int i = 0; i  < processedData.size() -1; i++) {
 
-		g.drawLine( point[i], verticalSpace * i, point[i+1], verticalSpace * (i + 1));
+		g.drawLine( verticalSpace * i, (y + sizeY) - (processedData.get(i) * range), verticalSpace * (i + 1), (y + sizeY) - (processedData.get(i + 1) * range));
 	    }
 	}
+    }
+
+    public int getLowest(){
+
+	int temp = 999999;
+	for (int i = 0; i < data.size(); i++) {
+
+	    if( temp > data.get(i)){
+
+		temp = data.get(i);
+	    }
+	}
+
+	return temp;
+    }
+
+    public int getHighest(){
+
+	int temp = 0;
+	for (int i = 0; i < data.size(); i++) {
+
+	    if ( temp < data.get(i)) {
+
+		temp = data.get(i);
+	    }
+	}
+
+	return temp;
+    }
+
+    //scales all data to a range between 0 and 100, this is so that the graphs lowest value becomes
+    //zero and its highest becomes 100, I intend to multiply the results by a hundredth of the hight
+    //of the graphs display height
+    public int scaleData(int _x){
+
+	int range = getHighest() - getLowest();
+	int scale = 100 * (_x - getLowest());
+
+	if (scale == 0) {
+
+	    scale = 1;
+	}
+	if (range == 0) {
+
+	    range = 1;
+	}
+
+	return scale/range;
     }
 
     public void resize( int sizex, int sizey){
