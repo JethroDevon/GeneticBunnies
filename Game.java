@@ -48,9 +48,7 @@ public class Game extends Canvas implements Runnable{
     Graphs BunnyLifeTime, WaterConsumption, FoodConsumption, ThirstDeaths, HungerDeaths;
 
     //flag to end menu options
-    boolean startFlag, menu, credits, simulation;
-
-    Sprite LifeBunt, ThirstBunt, FoodBunt, HungerBunt;
+    boolean startFlag, menu, credits, simulation, L, H, T, F;
 
     //this stores the last up down left or right arrow to be pressed   //as lUP, lDown, lRight, lLeft,
     //or if the arrows are activley being pressed it stores
@@ -67,7 +65,7 @@ public class Game extends Canvas implements Runnable{
 
     //this stores a typed keycode, it is returned with get typed,
     //default is zero
-    private int typed = 0;
+    private int typed = 0, round = 0;
 
     //this will store the background, an image loading class
     //will be used in the future, for now, the image
@@ -99,21 +97,20 @@ public class Game extends Canvas implements Runnable{
         menu = true;
 
 	BunnyLifeTime = new Graphs( Color.YELLOW, "BUNNY LIFETIME", "", "", 10, 10, 500, 300);
-	FoodConsumption = new Graphs( Color.GREEN, "FOOD CONSUMED", "", "", 10, 10, 500, 300);
-	ThirstDeaths = new Graphs( Color.CYAN, "THIRST DEATHS", "", "", 10, 10, 500, 300);
-	HungerDeaths = new Graphs( Color.ORANGE, "HUNGER DEATHS", "", "", 10, 10, 500, 300);
+	FoodConsumption = new Graphs( Color.GREEN, "FOOD CONSUMED", "", "", 10, 30, 500, 300);
+	ThirstDeaths = new Graphs( Color.CYAN, "THIRST DEATHS", "", "", 10, 50, 500, 300);
+	HungerDeaths = new Graphs( Color.ORANGE, "HUNGER DEATHS", "", "", 10, 70, 500, 300);
 
-	LifeBunt = new Sprite();
-        try{
-
+	try{
+	  
             //initialise menu object bunny object and Tiles objects
             options = new Menu( WIDTH, HEIGHT);
             tiles = new Tiles( 10, 10);
 
             //initialise the bunny manager object with number of bunnies, screen bounds and finite or infinate search space
-            bmanager = new BunnyManager( 4, tiles.getWidth(), tiles.getHeight(), true, tiles.tiles);
-
-            menuBackground = ImageIO.read( new File( "imgs/background.png"));
+      
+            bmanager = new BunnyManager( 16, tiles.getWidth(), tiles.getHeight(), true, tiles.tiles);
+	    menuBackground = ImageIO.read( new File( "imgs/background.png"));
 
         }catch( Exception e){
 
@@ -134,7 +131,7 @@ public class Game extends Canvas implements Runnable{
             if( bs == null){
 
                 //use one or two layers to buffer sprites if needed
-                createBufferStrategy(1);
+                createBufferStrategy(2);
 
                 //returns buffer to canvas for draw in jpanel
                 return;
@@ -148,8 +145,29 @@ public class Game extends Canvas implements Runnable{
             System.out.println("Error in draw function of Game: " + e.toString());
         }
 
-        tiles.drawGrid(graphics);
+	//draw background and info
 	graphics.setColor(Color.BLACK);
+	graphics.fillRect( 0, 0, WIDTH, HEIGHT);
+	graphics.setColor(Color.WHITE);
+
+	graphics.drawString( "ROUND " + round, WIDTH - 110, 50);
+	
+	if (round < 2) {
+
+	    graphics.drawString( "Graphs available after", WIDTH - 160, 100);
+	    graphics.drawString( "round 2", WIDTH - 110, 113);
+	}else{
+
+	    graphics.drawString( "Press L F T H or", WIDTH - 140, 100);
+	    graphics.drawString( "directions for graphs", WIDTH - 150, 113);
+	}
+	
+        graphics.drawString( "Press numbers 1 - 9", WIDTH - 150, 135);
+	graphics.drawString( "Bunny vision fields", WIDTH - 140, 147);
+	graphics.drawString( "Hit ESC for menu", WIDTH - 150, 230);
+
+	//draw display
+	tiles.drawGrid(graphics);
         tiles.showFood(graphics, bmanager.bunnyswarm, bmanager.deadbunnies);
         graphics.drawImage( options.buttons.get(2).getFrame(), mouseX, mouseY, 20,20, null);
 	
@@ -160,8 +178,8 @@ public class Game extends Canvas implements Runnable{
 	    HungerDeaths.addEntry( bmanager.totalHungerDeaths());
 	    ThirstDeaths.addEntry( bmanager.totalThirstDeaths());
 	    FoodConsumption.addEntry( bmanager.totalFood());
-	    bmanager = new BunnyManager( 4, tiles.getWidth(), tiles.getHeight(), true, tiles.tiles);
-	    
+	    bmanager = new BunnyManager( bmanager, tiles.tiles, 75);
+	    round ++;
 	    try{
 		
 		tiles = new Tiles( 10, 10);
@@ -171,19 +189,19 @@ public class Game extends Canvas implements Runnable{
 	    }
 	}
 
-	if( direction == "UP"){
+	if( direction == "UP" || L){
 
 	    BunnyLifeTime.drawGraph( graphics);
 	}
-	if ( direction == "LEFT") {
+	if ( direction == "LEFT" || H) {
 
 	    HungerDeaths.drawGraph( graphics);
 	}
-	if ( direction == "RIGHT") {
+	if ( direction == "RIGHT" || T) {
 
 	    ThirstDeaths.drawGraph( graphics);
 	}
-	if ( direction == "DOWN") {
+	if ( direction == "DOWN" || F) {
 
 	    FoodConsumption.drawGraph( graphics);
 	}
@@ -194,7 +212,7 @@ public class Game extends Canvas implements Runnable{
         //clears graphics object once has been drawn to buffer to save memory leak
         graphics.dispose();
 
-        //Synchronises drawring on the screen for smoother
+	//Synchronises drawring on the screen for smoother
         //graphics bliting, try commenting out to see difference -
         //its not so nice.
         Toolkit.getDefaultToolkit().sync();
@@ -212,7 +230,7 @@ public class Game extends Canvas implements Runnable{
             if(bs == null){
 
                 //two layers to buffer
-                createBufferStrategy(2);
+                createBufferStrategy(1);
 
                 //returns buffer to canvas for draw
                 return;
@@ -265,7 +283,7 @@ public class Game extends Canvas implements Runnable{
             if(bs == null){
 
                 //two layers to buffer
-                createBufferStrategy(3);
+                createBufferStrategy(2);
 
                 //returns buffer to canvas for draw
                 return;
@@ -276,8 +294,6 @@ public class Game extends Canvas implements Runnable{
 
 
             graphics.drawImage( creditsImage, 0, 0, WIDTH, HEIGHT, null);
-
-
 
             //shows image from buffer
             bs.show();
@@ -442,11 +458,209 @@ public class Game extends Canvas implements Runnable{
 
                 lastPressed = e.getKeyChar();
 
-            }else{
+	    }else{
 
                 int keyCode = e.getKeyCode();
 
                 switch( keyCode ) {
+
+		case KeyEvent.VK_0:
+
+		    if( bmanager.checkBunnyID(0)){
+
+			if( bmanager.bunnyswarm.get(0).selected){
+
+			    bmanager.bunnyswarm.get(0).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(0).selected = true;
+			}
+		    }
+
+		    break;
+		    
+		case KeyEvent.VK_1:
+
+		    if( bmanager.checkBunnyID(1)){
+
+			if( bmanager.bunnyswarm.get(1).selected){
+
+			    bmanager.bunnyswarm.get(1).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(1).selected = true;
+			}
+		    }
+
+		    break;
+
+		case KeyEvent.VK_2:
+
+		    if( bmanager.checkBunnyID(2)){
+
+			if( bmanager.bunnyswarm.get(2).selected){
+
+			    bmanager.bunnyswarm.get(2).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(2).selected = true;
+			}
+		    }
+
+		    break;
+
+		case KeyEvent.VK_3:
+
+		    if( bmanager.checkBunnyID(3)){
+
+			if( bmanager.bunnyswarm.get(3).selected){
+
+			    bmanager.bunnyswarm.get(3).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(3).selected = true;
+			}
+		    }
+
+		    break;
+
+		case KeyEvent.VK_4:
+
+		    if( bmanager.checkBunnyID(4)){
+
+			if( bmanager.bunnyswarm.get(4).selected){
+
+			    bmanager.bunnyswarm.get(4).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(4).selected = true;
+			}
+		    }
+
+		    break;
+
+		case KeyEvent.VK_5:
+
+		    if( bmanager.checkBunnyID(5)){
+
+			if( bmanager.bunnyswarm.get(5).selected){
+
+			    bmanager.bunnyswarm.get(5).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(5).selected = true;
+			}
+		    }
+
+		    break;
+
+		case KeyEvent.VK_6:
+
+		    if( bmanager.checkBunnyID(6)){
+
+			if( bmanager.bunnyswarm.get(6).selected){
+
+			    bmanager.bunnyswarm.get(6).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(6).selected = true;
+			}
+		    }
+
+		    break;
+
+		case KeyEvent.VK_7:
+
+		    if( bmanager.checkBunnyID(7)){
+
+			if( bmanager.bunnyswarm.get(7).selected){
+
+			    bmanager.bunnyswarm.get(7).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(7).selected = true;
+			}
+		    }
+
+		    break;
+
+		case KeyEvent.VK_8:
+
+		    if( bmanager.checkBunnyID(8)){
+
+			if( bmanager.bunnyswarm.get(8).selected){
+
+			    bmanager.bunnyswarm.get(8).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(8).selected = true;
+			}
+		    }
+
+		    break;
+
+		case KeyEvent.VK_9:
+
+		    if( bmanager.checkBunnyID(9)){
+
+			if( bmanager.bunnyswarm.get(9).selected){
+
+			    bmanager.bunnyswarm.get(9).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(9).selected = true;
+			}
+		    }
+
+		    break;
+
+		case KeyEvent.VK_F:
+
+		    if( !F){
+
+			F = true;
+		    }else{
+
+			F = false;
+		    }
+		    System.out.println(" This chart will show food consumptions per round.");
+		    break;
+
+		
+		case KeyEvent.VK_L:
+		    if( !L){
+
+			L = true;
+		    }else{
+
+			L = false;
+		    }
+		    System.out.println(" This chart will show the average life span of bunnies.");
+		    break;
+
+		
+		case KeyEvent.VK_H:
+		    if( !H){
+
+			H = true;
+		    }else{
+
+			H = false;
+		    }
+		    System.out.println(" This chart will show total hunger deaths per round.");
+		    break;
+
+		
+		case KeyEvent.VK_T:
+		    if( !T){
+
+			T = true;
+		    }else{
+
+			T = false;
+		    }
+		    System.out.println(" This chart will show total thirst deaths per round.");
+		    break;
 
                 case KeyEvent.VK_UP:
 

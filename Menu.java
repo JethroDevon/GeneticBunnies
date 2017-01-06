@@ -1,7 +1,5 @@
-
 import java.util.ArrayList;
 import java.awt.Graphics;
-
 
 public class Menu{
 

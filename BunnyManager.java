@@ -8,6 +8,9 @@ class BunnyManager{
 
     int WIDTH, HEIGHT, hungerdeaths, thirstdeaths, totalFoodConsumption;
 
+    //previous bunny manager
+    BunnyManager lastBM;
+
     public ArrayList<Bunny>bunnyswarm = new ArrayList<Bunny>();
     public ArrayList<Bunny>deadbunnies = new ArrayList<Bunny>();
     public ArrayList<Integer>averagesuccess = new ArrayList<Integer>();
@@ -19,31 +22,82 @@ class BunnyManager{
     //first value is population second two are map dimensions last is the type of search space to use
     public BunnyManager( int startsize, int _w, int _h, boolean torroidal, Tile[][] map){
 
+	
         WIDTH = _w;
         HEIGHT = _h;
-
+	
         try{
-            for (int i = 0; i < startsize; i++) {
+	    for (int i = 0; i < startsize; i++) {
 
-                bunnyswarm.add( new Bunny( bunnyswarm.size(), 0 + (int)(Math.random() * WIDTH), 0 + (int)(Math.random() * HEIGHT), 0, map));
-
-                //add random angle
-                bunnyswarm.get( bunnyswarm.size()-1).setAngle(0 + (Math.random() * 359));
-            }
+	    	bunnyswarm.add( new Bunny( i, WIDTH, HEIGHT, map));      	    
+	    }
 
             if( torroidal){
 
-                System.out.println("Torroidal search space selected");
+		//  System.out.println("Torroidal search space selected");
                 infinatespace = true;
             }else{
 
-                System.out.println("Finite search space selected");
+		//  System.out.println("Finite search space selected");
                 finitespace = true;
             }
         }catch( Exception e){
 
-            System.out.println(" bunny manager constructor has failed");
-        }
+            System.out.println(" bunny manager constructor has failed: " + e.toString());
+	}
+	
+    }
+
+    //this constructor takes a previous constructor as an argument and finds the best bunnies to apply
+    //genetic crossover with
+    public BunnyManager( BunnyManager bm, Tile[][] map, int mutationrate){
+
+	lastBM = bm;
+	
+	//avoid having a linked list going on too long
+	lastBM.lastBM = null;
+	WIDTH = bm.WIDTH;
+	HEIGHT = bm.HEIGHT;
+
+	try{
+   
+	    //this creates four bunnies from previous best bunnies by getting the best deadbunnies
+	    //by their IDs and popping them out the deadbunnies array
+	    
+	    Bunny mother = popPastDeadBunny( bestPastLifeTimeID());
+	    Bunny father = popPastDeadBunny( bestPastLifeTimeID());
+	    
+	    bunnyswarm.add(new Bunny( 0, mother, father, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( 1, father, mother, WIDTH, HEIGHT, map, mutationrate));
+	  
+	    mother = popPastDeadBunny( bestPastLifeTimeID());
+	    father = popPastDeadBunny( bestPastLifeTimeID());
+
+	    bunnyswarm.add(new Bunny( 2, mother, father, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( 3, father, mother, WIDTH, HEIGHT, map, mutationrate));
+
+	    mother = popPastDeadBunny( bestPastLifeTimeID());
+	    father = popPastDeadBunny( bestPastLifeTimeID());
+
+	    bunnyswarm.add(new Bunny( 2, mother, father, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( 3, father, mother, WIDTH, HEIGHT, map, mutationrate));
+
+	    mother = popPastDeadBunny( bestPastLifeTimeID());
+	    father = popPastDeadBunny( bestPastLifeTimeID());
+
+	    bunnyswarm.add(new Bunny( 2, mother, father, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( 3, father, mother, WIDTH, HEIGHT, map, mutationrate));
+
+	    //and will add four more random bunnies to bring total to 16
+	    for (int i = 0; i < 8; i++) {
+
+		 bunnyswarm.add( new Bunny( bunnyswarm.size(), WIDTH, HEIGHT, map));
+	    }
+	   	  
+	}catch(Exception e){
+
+	    System.out.println(" Bunny manager failed: " + e.toString());
+	}
     }
 
     //calculate centre of bunny mass
@@ -174,6 +228,20 @@ class BunnyManager{
 	return temp;
     }
 
+    //returns true if an integer applies to a bunny that is still alive
+    public boolean checkBunnyID( int id){
+
+	for (int i = 0; i < bunnyswarm.size(); i++) {
+
+	    if (bunnyswarm.get(i).bunnyID == id) {
+
+		return true;
+	    }
+	}
+
+	return false;
+    }
+
     //returns lifetime size of best bunny
     public int bestLifeTime(){
 
@@ -186,6 +254,41 @@ class BunnyManager{
 		temp = deadbunnies.get(i).cycles;
 	    }
 	}
+
+	return temp;
+    }
+
+    //returns lifetime size of best bunny
+    public int bestPastLifeTimeID(){
+
+	int temp = 0;
+	int id = 0;
+
+	for (int i = 0; i < lastBM.deadbunnies.size() ; i++) {
+
+	    if( lastBM.deadbunnies.get(i).cycles > temp){
+
+		temp = lastBM.deadbunnies.get(i).cycles;
+		id = lastBM.deadbunnies.get(i).bunnyID;
+	    }
+	}
+
+	return id;
+    }
+
+    //removes a bunny from the deadbunny array list by ID
+    public Bunny popPastDeadBunny( int id){
+
+	Bunny temp = lastBM.deadbunnies.get(0);
+	for (int i = 0; i < lastBM.deadbunnies.size(); i++) {
+
+	    if ( lastBM.deadbunnies.get(i).bunnyID == id) {
+
+		temp = lastBM.deadbunnies.get(i);
+		lastBM.deadbunnies.remove(i);
+		break;
+	    }
+    	}
 
 	return temp;
     }
