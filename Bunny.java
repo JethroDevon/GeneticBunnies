@@ -929,7 +929,7 @@ class Bunny extends Sprite{
 	int thirstTax = Math.abs( watercapacity - thirst);
 	int hungerTax = Math.abs( foodcapacity - hunger);
 
-	health -= ( hungerTax - thirstTax) * (1 + metabolism/2);
+	health -= ( hungerTax + thirstTax) * (1 + metabolism/2);
 	thirst-=2;
 	hunger--;
 	

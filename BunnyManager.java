@@ -88,7 +88,7 @@ class BunnyManager{
 
 	    if( specialbuns.size() > 1){
 
-		System.out.println( specialbuns.size() + " elite breeding bunnies selected");
+		System.out.println( specialbuns.size() + " special breeding bunnies selected");
 		for (int i = 0; i < specialbuns.size(); i++) {
 		    for (int x = 0; x < specialbuns.size(); x++) {
 
@@ -99,45 +99,51 @@ class BunnyManager{
 		    }
 		}
 	    }
-	    specialbuns.clear();
-
+	   
 	    if (bunnyswarm.size() > 16) {
 
+		bunnyswarm.clear();
+		ArrayList<Bunny>elites = new ArrayList<Bunny>();
+		
 		//select the bunnies who have had the most births
-		//if this does not make up sixteen then also select
-		//bunnies that lived the longest 
-	    }
-	    
-	    //adds each bunny that matured in the last round
-	    if ( bunnyswarm.size() < 8) {
-			    
-		for (int i = 0; i < lastBM.deadbunnies.size(); i++) {
+		for (int i = 0; i < specialbuns.size(); i++) {
 
-		    int past = lastMaturedID();
-		    if (past != -1) {
+		    if (specialbuns.get(i).births > 1) {
 
-			specialbuns.add( popPastDeadBunny(past));
+			elites.add(specialbuns.get(i));
 		    }
 		}
-	    
-		System.out.println(" maturities last round:" + specialbuns.size());
+
+		System.out.println( specialbuns.size() + "elite breeding bunnies selected");
 		
-		if( specialbuns.size() > 1){
+		for (int i = 0; i < specialbuns.size(); i++) {
+		    for (int x = 0; x < specialbuns.size(); x++) {
 
-		    System.out.println( specialbuns.size() + " elite mature bunnies selected");
-		    for (int i = 0; i < specialbuns.size(); i++) {
-			for (int x = 0; x < specialbuns.size(); x++) {
+			if( i != x && elites.size() < 16){
 
-			    if( i != x){
-
-				bunnyswarm.add(new Bunny( bunnyswarm.size(), specialbuns.get(i), specialbuns.get(x), WIDTH, HEIGHT, map, mutationrate));
-			    }
+			   elites.add(new Bunny( bunnyswarm.size(), specialbuns.get(i), specialbuns.get(x), WIDTH, HEIGHT, map, mutationrate));
 			}
 		    }
 		}
+
+		for (int i = 0; i < elites.size(); i++) {
+
+		    bunnyswarm.add( elites.get(i));
+		}
+		
+		for (int i = 0; i < specialbuns.size(); i++) {
+		    for (int x = 0; x < specialbuns.size(); x++) {
+
+			if( i != x && bunnyswarm.size() < 16){
+
+			    bunnyswarm.add(new Bunny( bunnyswarm.size(), specialbuns.get(i), specialbuns.get(x), WIDTH, HEIGHT, map, mutationrate));
+			}
+		    }
+		}
+		
 	    }
 
-	    //if there were not enough maternal or matured bunnies keep the bunnies that live the longest
+	    //algorithm starts just by keeping the bunnies that live the longest
 	    if( bunnyswarm.size() < 16){
 
 		//this creates four bunnies from previous best bunnies by getting the best deadbunnies
