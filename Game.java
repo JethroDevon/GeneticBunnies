@@ -45,10 +45,10 @@ public class Game extends Canvas implements Runnable{
     Tiles tiles;
 
     //Graph objects overlay statistics based on the bunny simulation
-    Graphs BunnyLifeTime, WaterConsumption, FoodConsumption, ThirstDeaths, HungerDeaths;
+    Graphs BunnyLifeTime, WaterConsumption, FoodConsumption, ThirstDeaths, HungerDeaths, TotalLife, TotalMaturities, Births;
 
     //flag to end menu options
-    boolean startFlag, menu, credits, simulation, L, H, T, F;
+    boolean startFlag, menu, credits, simulation, L, H, T, F, X, M, B;
 
     //this stores the last up down left or right arrow to be pressed   //as lUP, lDown, lRight, lLeft,
     //or if the arrows are activley being pressed it stores
@@ -96,11 +96,15 @@ public class Game extends Canvas implements Runnable{
         //this starts draw in menu mode
         menu = true;
 
+	//initialise all graphs
+        TotalLife = new Graphs( Color.WHITE, "TOTAL LIFETIMES", "", "", 10, 0, 500, 300);
 	BunnyLifeTime = new Graphs( Color.YELLOW, "BUNNY LIFETIME", "", "", 10, 10, 500, 300);
-	FoodConsumption = new Graphs( Color.GREEN, "FOOD CONSUMED", "", "", 10, 30, 500, 300);
-	ThirstDeaths = new Graphs( Color.CYAN, "THIRST DEATHS", "", "", 10, 50, 500, 300);
-	HungerDeaths = new Graphs( Color.ORANGE, "HUNGER DEATHS", "", "", 10, 70, 500, 300);
-
+	FoodConsumption = new Graphs( Color.GREEN, "FOOD CONSUMED", "", "", 10, 20, 500, 300);
+	ThirstDeaths = new Graphs( Color.CYAN, "THIRST DEATHS", "", "", 10, 30, 500, 300);
+	HungerDeaths = new Graphs( Color.ORANGE, "HUNGER DEATHS", "", "", 10, 40, 500, 300);
+	TotalMaturities = new Graphs( Color.magenta, "MATURITIES", "", "", 10, 50, 500, 300);
+	Births = new Graphs( Color.pink, "BIRTHS", "", "", 10, 60, 500, 300);
+	
 	try{
 	  
             //initialise menu object bunny object and Tiles objects
@@ -150,21 +154,21 @@ public class Game extends Canvas implements Runnable{
 	graphics.fillRect( 0, 0, WIDTH, HEIGHT);
 	graphics.setColor(Color.WHITE);
 
-	graphics.drawString( "ROUND " + round, WIDTH - 110, 50);
+	graphics.drawString( "ROUND " + round, WIDTH - 115, 50);
 	
 	if (round < 2) {
 
-	    graphics.drawString( "Graphs available after", WIDTH - 160, 100);
+	    graphics.drawString( "Graphs available after", WIDTH - 170, 100);
 	    graphics.drawString( "round 2", WIDTH - 110, 113);
 	}else{
 
-	    graphics.drawString( "Press L F T H or", WIDTH - 140, 100);
-	    graphics.drawString( "directions for graphs", WIDTH - 150, 113);
+	    graphics.drawString( "Press L F T H X M B", WIDTH - 110, 100);
+	    graphics.drawString( "for graphs", WIDTH - 100, 113);
 	}
 	
         graphics.drawString( "Press numbers 1 - 9", WIDTH - 150, 135);
-	graphics.drawString( "Bunny vision fields", WIDTH - 140, 147);
-	graphics.drawString( "Hit ESC for menu", WIDTH - 150, 230);
+	graphics.drawString( "Bunny vision fields", WIDTH - 145, 147);
+	graphics.drawString( "Hit ESC for menu", WIDTH - 140, 230);
 
 	//draw display
 	tiles.drawGrid(graphics);
@@ -174,11 +178,17 @@ public class Game extends Canvas implements Runnable{
 	//starts a new game after recording importand bunny data
 	if( bmanager.bunnyFunctions(tiles.tiles, graphics)){
 
+	    System.out.println();
+	    System.out.println( "New round" );
+	    System.out.println();
 	    BunnyLifeTime.addEntry( bmanager.bestLifeTime());
 	    HungerDeaths.addEntry( bmanager.totalHungerDeaths());
 	    ThirstDeaths.addEntry( bmanager.totalThirstDeaths());
 	    FoodConsumption.addEntry( bmanager.totalFood());
-	    bmanager = new BunnyManager( bmanager, tiles.tiles, 75);
+	    TotalLife.addEntry( bmanager.totalLife());
+	    TotalMaturities.addEntry( bmanager.totalMaturities());
+	    Births.addEntry( bmanager.totalBirths());
+	    bmanager = new BunnyManager( bmanager, tiles.tiles, 30);
 	    round ++;
 	    try{
 		
@@ -189,9 +199,10 @@ public class Game extends Canvas implements Runnable{
 	    }
 	}
 
+	//directional keys and space to show graphs
 	if( direction == "UP" || L){
 
-	    BunnyLifeTime.drawGraph( graphics);
+	    BunnyLifeTime.drawGraph( graphics);	   
 	}
 	if ( direction == "LEFT" || H) {
 
@@ -204,6 +215,18 @@ public class Game extends Canvas implements Runnable{
 	if ( direction == "DOWN" || F) {
 
 	    FoodConsumption.drawGraph( graphics);
+	}
+	if (direction == "JUMP" || X) {
+
+	    TotalLife.drawGraph( graphics);
+	}
+        if (M) {
+
+	    TotalMaturities.drawGraph( graphics);
+	}
+        if (B) {
+
+	    Births.drawGraph( graphics);
 	}
 
         //shows image from buffer
@@ -662,6 +685,39 @@ public class Game extends Canvas implements Runnable{
 		    System.out.println(" This chart will show total thirst deaths per round.");
 		    break;
 
+		case KeyEvent.VK_X:
+		    if( !X){
+
+			X = true;
+		    }else{
+
+			X = false;
+		    }
+		    System.out.println(" This chart will show the total life spans of all bunnies.");
+		    break;
+
+	        case KeyEvent.VK_M:
+		    if( !M){
+
+			M = true;
+		    }else{
+
+			M = false;
+		    }
+		    System.out.println(" This chart will show the total Maturities of all bunnies.");
+		    break;
+
+			case KeyEvent.VK_B:
+		    if( !B){
+
+			B = true;
+		    }else{
+
+			B = false;
+		    }
+		    System.out.println(" This chart will show the total Births.");
+		    break;
+	
                 case KeyEvent.VK_UP:
 
                     direction = "UP";

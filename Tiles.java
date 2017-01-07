@@ -32,7 +32,8 @@ class Tiles extends Sprite{
                     //get frame 25, the one with grass on it
                     tiles[x][y] = new Tile( "grass", getFrame(0));
                     tiles[x][y].setID(String.valueOf(x + ( _width * y)));
-                    //give the tiles their index numbers
+
+		    //give the tiles their index numbers
                     tiles[x][y].xtile = x;
                     tiles[x][y].ytile = y;
 
@@ -41,6 +42,7 @@ class Tiles extends Sprite{
                     //sets x and y positions based on width and height in relation to other
                     tiles[x][y].setXY(x * tilesize, y * tilesize);
                     tiles[x][y].setWH( tilesize, tilesize);
+		    tiles[0][0].food = 0;
                 }
             }
 
@@ -111,7 +113,46 @@ class Tiles extends Sprite{
         }
     }
 
+    //create n amount of watering holes, although if the screen is too small then
+    //and too many are made the screen will default to water only
+    public void createWateringHoles( int holes){
+
+	//turn all holes into water if beyond threshold
+	if( holes > (tiles.length * tiles.length)/12){
+
+	    for (int i = 0; i < tiles.length; i++) {
+		for (int y = 0; y < tiles[i].length; y++) {
+
+		    tiles[i][y].changeTileType( "water", getFrame(3));
+		}
+	    }
+	}
+
+	//otherwise use symetry to add more holes
+    }
+
+    //creates a new watering hole in a random place each round
+    public void createRandomHoles( int range){
+
+    }
+
+    //create a small single watering hole in the centre of the screen
     public void createWateringHole( int _x, int _y){
+
+        try{
+
+            tiles[_x][_y].changeTileType( "water", getFrame(3));
+            tiles[_x+1][_y].changeTileType( "water", getFrame(1));
+            tiles[_x][_y+1].changeTileType( "water", getFrame(4));
+            tiles[_x+1][_y+1].changeTileType( "water", getFrame(2));
+        }catch(Exception e){
+
+            System.out.println("Error making sandPatch!");
+        }
+
+    }
+
+    public void createLargeWateringHole( int _x, int _y){
 
         try{
 
