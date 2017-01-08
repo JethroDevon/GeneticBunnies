@@ -67,9 +67,9 @@ class Graphs{
 	}
 
 	//trim data array down so to as not to make it so hard to read
-	if ( data.size() > 70) {
+	if ( data.size() > 120) {
 
-	    for (int i = 0; i < 10; i++) {
+	    for (int i = 0; i < 20; i+=2) {
 
 		data.remove(i);
 	    }

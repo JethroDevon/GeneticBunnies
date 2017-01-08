@@ -23,6 +23,7 @@ public class Menu{
 	    buttons.add(new Sprite("random", "imgs/random.png", 1, 2));
 	    buttons.add(new Sprite("genetic", "imgs/genetic.png", 1, 2));
 	    buttons.add(new Sprite("breeding", "imgs/breeding.png", 1, 2));
+	    buttons.add(new Sprite("foodscarcity", "imgs/scarcity.png", 1, 2));
 	    buttons.add(new Sprite("exit", "imgs/exit.png", 1, 2));
 	    buttons.add(new Sprite("pointer", "imgs/pointer.png", 1, 2));
             initMenu();
@@ -89,6 +90,9 @@ public class Menu{
                     }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("exit")){
 
                         return 6;
+                    }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("foodscarcity")){
+
+                        return 7;
                     }
                 }
             }

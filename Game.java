@@ -31,7 +31,7 @@ import javax.imageio.ImageIO;
 public class Game extends Canvas implements Runnable{
 
     //screen size variables initialised in constructor
-    private int WIDTH, HEIGHT, mouseX, mouseY, maptype;
+    private int WIDTH, HEIGHT, mouseX, mouseY, maptype, foodscarcity;
 
     //thses two objects are the key lelements of the clipping blitting method
     private BufferStrategy bs;
@@ -109,7 +109,7 @@ public class Game extends Canvas implements Runnable{
 
 	    //initialise menu object bunny object and Tiles objects
 	    options = new Menu( WIDTH, HEIGHT);	
-            tiles = new Tiles( 10, 10, maptype);
+            tiles = new Tiles( 10, 10, maptype, foodscarcity);
             bmanager = new BunnyManager( 16, tiles.getWidth(), tiles.getHeight(), true, tiles.tiles);
 	         
             //initialise the bunny manager object with number of bunnies, screen bounds and finite or infinate search space
@@ -172,7 +172,7 @@ public class Game extends Canvas implements Runnable{
 	//draw display
 	tiles.drawGrid(graphics);
         tiles.showFood(graphics, bmanager.bunnyswarm, bmanager.deadbunnies);
-	graphics.drawImage( options.buttons.get(6).getFrame(), mouseX, mouseY, 20,20, null);
+	graphics.drawImage( options.buttons.get(7).getFrame(), mouseX, mouseY, 20,20, null);
 	
 	//starts a new game after recording importand bunny data
 	if( bmanager.bunnyFunctions(tiles.tiles, graphics)){
@@ -192,7 +192,7 @@ public class Game extends Canvas implements Runnable{
 	    
 	    try{
 		
-		tiles = new Tiles( 10, 10, maptype);
+		tiles = new Tiles( 10, 10, maptype, foodscarcity);
 	    }catch( Exception e){
 
 		System.out.println(e.toString());
@@ -459,6 +459,49 @@ public class Game extends Canvas implements Runnable{
                 //if threads are present must kill threads
                 //change if a network connection is implemented
                 System.exit(0);
+            }else if( options.getButton() == 7 && startFlag){
+
+                foodscarcity++;
+
+	        switch(foodscarcity){
+		case 0:
+
+		    System.out.println("scarce - 50 on half the tiles");
+		    break;
+
+		case 1:
+
+		    System.out.println("50 per tile");
+		    break;
+
+		case 2:
+
+		    System.out.println("100 per tile");
+		    break;
+		  
+	        case 3:
+
+		    System.out.println("150 per tile");
+		    break;
+		 case 4:
+
+		    System.out.println("200 per tile");
+		    break;
+		 case 5:
+
+		    System.out.println("250 per tile");
+		    break;
+		 case 6:
+
+		    System.out.println("300 per tile");
+		    break;
+		}
+		    
+		if (foodscarcity > 6) {
+
+		    System.out.println("scarce, 50 on half the tiles");
+	            foodscarcity = 0;
+		}
             }
         }
 

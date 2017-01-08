@@ -1,11 +1,12 @@
 import java.awt.Graphics;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Random;
 
 class Tiles extends Sprite{
 
     //tiles across by tiles down, size of the tiles
-    int mwidth, mheight, tilesize, mapType;
+    int mwidth, mheight, tilesize, mapType, scarcity;
 
     //this will store each individual tile for logic and display
     Tile[][] tiles;
@@ -14,8 +15,10 @@ class Tiles extends Sprite{
     //draw a watering hole in their place
     int[][] kernel = {{-1, -1},{ 0, -1},{ 1, -1},{-1, 0},{ 0, 0},{ 1, 0},{-1, 1},{ 0, 1},{ 1, 1}};
 
+    Random rand = new Random();
+    
     //constructor 1 for tiles function, has default water location
-    public Tiles( int _width, int _height, int _mt) throws Exception{
+    public Tiles( int _width, int _height, int _mt, int scarcity) throws Exception{
 
         super( "tilesheet", "imgs/tileIMGs.png", 4, 3);
 
@@ -24,7 +27,7 @@ class Tiles extends Sprite{
         mheight = _height;
 
         try{
-
+	    
             tiles = new Tile[ mwidth][ mheight];
 
             for (int x = 0; x < mwidth; x++) {
@@ -61,6 +64,7 @@ class Tiles extends Sprite{
 
 		bunnyIsland();
 	    }
+	     foodAvailability(scarcity);
 	    
            
         }catch( Exception e){
@@ -99,7 +103,7 @@ class Tiles extends Sprite{
         for (int i = 0; i < bswarm.size(); i++) {
             for( int f = 0; f < bswarm.get(i).eatenTiles.size(); f++){
                 for(int x = 0; x < tiles.length; x++){
-                    for(int y = 0; y < tiles[x].length; y++){
+		    for(int y = 0; y < tiles[x].length; y++){
 
                         if( bswarm.get(i).eatenTiles.get(f)!= null && tiles[x][y].checkCollision(bswarm.get(i).eatenTiles.get(f))){
 
@@ -128,6 +132,41 @@ class Tiles extends Sprite{
             }
         }
     }
+
+    public void foodAvailability(int A){
+
+	if(A == 0){
+
+	    foodScarce();
+	}else{
+
+	    foodFrequency( A);
+	}
+    }
+
+    public void foodScarce(){
+
+	 for(int x = 0; x < tiles.length; x++){
+          for(int y = 0; y < tiles[x].length; y++){             
+
+	      int num = rand.nextInt(2);
+	      
+	      if( num == 1)
+	        tiles[x][y].food = 50;
+	  }
+        }
+    }
+
+    public void foodFrequency( int F){
+	
+       for(int x = 0; x < tiles.length; x++){
+          for(int y = 0; y < tiles[x].length; y++){             
+
+	        tiles[x][y].food = F * 50;
+	  }
+        }
+    }
+    
 
     //create n amount of watering holes, although if the screen is too small then
     //and too many are made the screen will default to water only

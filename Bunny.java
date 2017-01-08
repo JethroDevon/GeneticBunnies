@@ -97,7 +97,7 @@ class Bunny extends Sprite{
 	totalcapacity = hungryness + thirstyness;
 
     	//find point between feeling full and time to start eating/drinkning as
-    	//totalcapacity - (totalcapacity - hungeryness * 10 % of totalcapacity
+    	//totalcapacity - (totalcapacity - hungeryness * N% of totalcapacity
     	hungrynesspenalty = foodcapacity - (foodcapacity - ((foodcapacity/100)*(hungryness)));
     	thirstynesspenalty = watercapacity - (watercapacity - ((watercapacity/100)*(thirstyness)));
 
@@ -179,7 +179,7 @@ class Bunny extends Sprite{
         metabolism = option_chromosome[3];
         foodcapacity = 100 * option_chromosome[4];
         watercapacity = 100 * option_chromosome[5];
-	socialness = 100 * (option_chromosome[6] + 1);
+	socialness = 60 * (option_chromosome[6] + 1);
 
         //find point between feeling full and time to start eating/drinkning as
     	//totalcapacity - (totalcapacity - hungeryness * 10 % of totalcapacity
