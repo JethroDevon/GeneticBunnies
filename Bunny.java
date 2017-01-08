@@ -7,7 +7,7 @@ class Bunny extends Sprite{
 
     //these are the member variables that make up id number, vision catagory, amount of drink to take in, amount of food to take
     //at the end there are also bunny needs and bunny health and lifetime to store the number of cycles the bunny endured
-    int bx, by, bunnyID, vision, grazecycles, hunger, thirst, health = 600000, cycles, penalty, foodEaten, presentNode, totalNodes, presentCycle, gestation = 200, pregnancyCycle;
+    int bx, by, bunnyID, vision, grazecycles, hunger, thirst, health = 600000, cycles, penalty, foodEaten, gestation = 200, pregnancyCycle, socialness, concenration, totalcapacity;
 
     //when the bunny should stop considering self hungry or thristy and choose food or water over the other
     int watercapacity, foodcapacity, thirstyness, hungryness ,hungrynesspenalty ,thirstynesspenalty, births;
@@ -18,10 +18,6 @@ class Bunny extends Sprite{
     //sight kernel for preset sight shapes
     int[][] kernel;
 
-    //this integer represents the chromosomes, 16 values represent eight xy coordinatates ( xyxyxyxyxyxyxyxy)
-    //the bunny will walk in a pattern based on these coordinates around itself
-    int[][] movement_chromosome = new int[8][2];
-
     //similar to above, a set of values determine the bunnies vision range in terms of eigh xy pairs, just within a smaller
     //range
     int[][] vision_chromosome = new int[8][2];
@@ -31,7 +27,7 @@ class Bunny extends Sprite{
     int[] option_chromosome;
 
     //some important booleans for going to food and drink logic
-    boolean busy, hungry, thirsty, alive, grazing, walk, diedofthirst, diedofhunger, canbreed, drank, pregnant, matured;
+    boolean busy, hungry, thirsty, alive, grazing, diedofthirst, diedofhunger, canbreed, drank, pregnant, matured;
 
     //I plan to implement functions that will have the bunny locate these targets
     Tile collidingTile, centreOfBunnyMass, bestBunny, bestBunnyMass;
@@ -52,7 +48,7 @@ class Bunny extends Sprite{
     Tile choice;
 
     //a bunny suitor to home in on
-    Bunny suitor = null, father = null;
+    Bunny suitor = null, father = null, nearestBunny = null;
 
     Random gen = new Random(System.currentTimeMillis());
      
@@ -66,22 +62,17 @@ class Bunny extends Sprite{
     	bx = _bx;
     	by = _by;
     	bunnyID = id;
-    	presentNode = 0;
-    	walk = true;
-    	selected = false;
+
+	//assign random starting position and angle
+	setXY( gen.nextInt(bx), gen.nextInt(by));
+	setAngle( gen.nextInt(359));
 	
-        //bunnies are alive by default
-        alive = true;
+        //bunnies are dead by default! this is to solve the round = problem! much lazy so clever
+	alive = false;
 	
         // may used to store position of best bunny
         int[] pos;
 	
-    	//generate random genes for the movement chromosome
-    	//bunny starting postion is based on movement chromosome
-    	movement_chromosome = genMovement();
-    	genPath( map);
-    	setXY( path.get(0).getPosX(), path.get(0).getPosY());
-
     	//generate random genes for the vision chromosome
     	vision_chromosome = genVision();
     	kernel = vision_chromosome;
@@ -98,49 +89,22 @@ class Bunny extends Sprite{
         metabolism = option_chromosome[3];
         foodcapacity = 100 * option_chromosome[4];
         watercapacity = 100 * option_chromosome[5];
+	socialness = 100 * (option_chromosome[6] + 1);
 
     	//bunny starts fed and watered
         hunger = foodcapacity;
         thirst = watercapacity;
+	totalcapacity = hungryness + thirstyness;
 
     	//find point between feeling full and time to start eating/drinkning as
     	//totalcapacity - (totalcapacity - hungeryness * 10 % of totalcapacity
-    	hungrynesspenalty = foodcapacity - (foodcapacity - ((foodcapacity/100)*(hungryness * 4)));
-    	thirstynesspenalty = watercapacity - (watercapacity - ((watercapacity/100)*(thirstyness * 4)));
-
-	System.out.println();
-        System.out.println(" ~ BUNNY NUMBER " + bunnyID + " ~");
-
-	//show vision to see if it has worked
-	System.out.print( " vision: ");
-	for (int i = 0; i < kernel.length; i++) {
-
-    	    System.out.print( "(" +kernel[i][0] + ") - (" + kernel[i][1]+ ") "); 
-    	}
-    	System.out.println();
-
-	//same for options
-        System.out.print(  " options: ");
-    	for (int i = 0; i < option_chromosome.length; i++) {
-
-    	     System.out.print( option_chromosome[i] + " - ");
-    	}
-    	System.out.println();
-
-	//and movement
-        System.out.print(  " movement: ");
-    	for (int i = 0; i < movement_chromosome.length; i++) {
-
-    	     System.out.print( movement_chromosome[i][0] + " - " + movement_chromosome[i][1] + " ");
-    	}
-	
-    	System.out.println();
+    	hungrynesspenalty = foodcapacity - (foodcapacity - ((foodcapacity/100)*(hungryness)));
+    	thirstynesspenalty = watercapacity - (watercapacity - ((watercapacity/100)*(thirstyness)));
 
         //sprites are created in try catch blocks
         try{
 
 	    gen.setSeed(1234);
-            setAngle(pointToTwo( path.get(0)));
             setAcceleration(1);
             setmaxVelocity(1 * metabolism);
             setVelocity(1 * metabolism);
@@ -173,8 +137,11 @@ class Bunny extends Sprite{
     	by = _by;
     	map = _map;
     	bunnyID = id;
-    	walk = true;
     	selected = false;
+	
+        //assign random starting position and angle
+	setXY( gen.nextInt(bx), gen.nextInt(by));
+	setAngle( gen.nextInt(359));
 	
         //bunnies are alive by default
         alive = true;
@@ -185,8 +152,6 @@ class Bunny extends Sprite{
     	//create genes based on mother and father
     	vision_chromosome = visionChildrenDouble( mother, father, mutationrate);
     	option_chromosome = optionChildrenDouble( mother, father, mutationrate);
-    	movement_chromosome = movementChildrenDouble( mother, father, mutationrate);
-    	genPath( map);
 	kernel = vision_chromosome;
 	System.out.println(" ~ BUNNY NUMBER " + bunnyID + " ~");
 
@@ -194,7 +159,7 @@ class Bunny extends Sprite{
 	System.out.print( " vision: ");
 	for (int i = 0; i < kernel.length; i++) {
 
-    	     System.out.print( "(" +kernel[i][0] + ") - (" + kernel[i][1]+ ") ");
+	    System.out.print( "(" +kernel[i][0] + ") - (" + kernel[i][1]+ ") ");
     	}
     	System.out.println();
 
@@ -202,51 +167,35 @@ class Bunny extends Sprite{
         System.out.print(  " options: ");
     	for (int i = 0; i < option_chromosome.length; i++) {
 
-    	     System.out.print( option_chromosome[i] + " - ");
+	    System.out.print( option_chromosome[i] + " - ");
     	}
     	System.out.println();
-
-	//and movement
-        System.out.print(  " movement: ");
-    	for (int i = 0; i < movement_chromosome.length; i++) {
-
-    	     System.out.print( movement_chromosome[i][0] + " - " + movement_chromosome[i][1] + " ");
-    	}
-	
     	System.out.println();
 
-	//start at random node in bunnies path
-	int rpath = gen.nextInt(7);
-	presentNode = rpath;
-    	setXY( path.get(rpath).getPosX(), path.get(rpath).getPosY());
-
-    	//find point between feeling full and time to start eating/drinkning as
-    	//totalcapacity - (totalcapacity - hungeryness * 10 % of totalcapacity
-    	hungrynesspenalty = foodcapacity - (foodcapacity - ((foodcapacity/100)*(hungryness * 4)));
-    	thirstynesspenalty = watercapacity - (watercapacity - ((watercapacity/100)*(thirstyness * 4)));	
-	
+    	
     	hungryness = option_chromosome[0];
         thirstyness = option_chromosome[1];
         grazecycles = option_chromosome[2];
         metabolism = option_chromosome[3];
         foodcapacity = 100 * option_chromosome[4];
         watercapacity = 100 * option_chromosome[5];
+	socialness = 100 * (option_chromosome[6] + 1);
+
+        //find point between feeling full and time to start eating/drinkning as
+    	//totalcapacity - (totalcapacity - hungeryness * 10 % of totalcapacity
+    	hungrynesspenalty = foodcapacity - (foodcapacity - ((foodcapacity/100)*(hungryness)));
+    	thirstynesspenalty = watercapacity - (watercapacity - ((watercapacity/100)*(thirstyness)));
 
     	//bunny starts fed and watered
         hunger = foodcapacity;
         thirst = watercapacity;
+        totalcapacity = hungryness + thirstyness;
+	System.out.println();
 
-	System.out.println();
-	System.out.println();
 	
     	//sprites are created in try catch blocks
         try{
-
-    	    gen.setSeed(1234);
-            setAngle(pointToTwo(path.get(rpath+1)));
-            setAcceleration(1);
-            setmaxVelocity(1 * metabolism);
-            setVelocity(1 * metabolism);
+  	  
             addAngleCondition( 247, 292, 98, 104); //UP
             addAngleCondition( 67, 112, 120, 128);//DOWN
             addAngleCondition( 157, 202, 144, 152);//LEFT
@@ -257,6 +206,11 @@ class Bunny extends Sprite{
             addAngleCondition( 202, 247, 112, 128);//UPLEFT
             addAngleCondition( 112, 157, 136, 144);//DOWNLEFT
             pollConditions("ANGLE");
+
+	    gen.setSeed(1234);
+            setAcceleration(1);
+            setmaxVelocity(1 * metabolism);
+            setVelocity(1 * metabolism);
     	    //System.out.println( "Bunny number " + bunnyID + " is alive " + alive);
         }catch( Exception e){
 
@@ -266,31 +220,12 @@ class Bunny extends Sprite{
 
     int[] genOptions(){
 
-        int[] temp = new int[6];
-        for (int i = 0; i < 6; i++) {
+        int[] temp = new int[7];
+        for (int i = 0; i < 7; i++) {
 
             temp[i] = gen.nextInt( 9) + 1;
 
         }
-        return temp;
-    }
-
-    int[][] genMovement(){
-
-    	int mapx = map.length;
-    	int mapy = map[map.length-1].length;
-        int[][] temp = new int[mapx][mapy];
-
-        for (int i = 0; i < 8; i++) {
-
-            temp[i][0] =  gen.nextInt( mapx -1);
-        }
-
-    	for (int i = 0; i < 8; i++) {
-
-            temp[i][1] =  gen.nextInt( mapy -1);
-        }
-
         return temp;
     }
 
@@ -309,25 +244,6 @@ class Bunny extends Sprite{
         }
 
     	return temp;
-    }
-
-    //generates an array list out of the movement chromosomes to create a path to travel between
-    void genPath( Tile[][] map){
-
-        try{
-
-    	    for (int i = 0; i < 8; i++) {
-
-    		path.add( map[movement_chromosome[i][0]][movement_chromosome[i][1]]);
-    	    }
-        }catch( Exception e){
-
-            System.out.println("failed to generate a path for bunny " + e.toString());
-        }finally{
-
-    	    totalNodes = path.size();
-    	    //System.out.println(" path with " + totalNodes + " nodes successfuly created");
-     }
     }
 
     public int[][] visionChildrenSingle( Bunny mother, Bunny father, int mutationrate){
@@ -356,7 +272,7 @@ class Bunny extends Sprite{
     	// a random option
     	if ( chance > range && chance < range + mutationrate) {
 
-    	     System.out.println("MUTATION! IN BUNNY " + bunnyID + " (vision) ");
+	    System.out.println("MUTATION! IN BUNNY " + bunnyID + " (vision) ");
     	    int genetomutate = gen.nextInt( 8);
     	    int mutategenetox = gen.nextInt( 5) -2;
     	    int mutategenetoy = gen.nextInt( 5) -2;
@@ -416,14 +332,14 @@ class Bunny extends Sprite{
     //combines two parents to return option genes with a single crossover point, the mutation rate is mutationrate in one thousand
     public int[] optionChildrenSingle( Bunny mother, Bunny father, int mutationrate){
 
-    	int[] temp = new int[6];
+    	int[] temp = new int[7];
 	
     	for (int i = 0; i < father.option_chromosome.length/2; i++) {
 
     	    temp[i] = father.option_chromosome[i];
     	}
 
-    	for (int i = mother.option_chromosome.length/2; i < 6; i++) {
+    	for (int i = mother.option_chromosome.length/2; i < 7; i++) {
 
     	    temp[i] = mother.option_chromosome[i];
     	}
@@ -439,7 +355,7 @@ class Bunny extends Sprite{
     	if ( chance > range && chance < range + mutationrate) {
 
     	    System.out.println("MUTATION! IN BUNNY " + bunnyID + "( options )");
-    	    int genetomutate = gen.nextInt( 6);	    
+    	    int genetomutate = gen.nextInt( 7);	    
     	    int mutategeneto = gen.nextInt( 2);
 
     	    if( mutategeneto != 1){
@@ -459,7 +375,7 @@ class Bunny extends Sprite{
     //as above but with double crossover points
     public int[] optionChildrenDouble( Bunny mother, Bunny father, int mutationrate){
 
-    	int[] temp = new int[6];
+    	int[] temp = new int[7];
 	
     	for (int i = 0; i < 2; i++) {
 
@@ -471,7 +387,7 @@ class Bunny extends Sprite{
     	    temp[i] = mother.option_chromosome[i];
     	}
 
-    	for (int i = 4; i < 6; i++) {
+    	for (int i = 4; i < 7; i++) {
 
     	    temp[i] = father.option_chromosome[i];
     	}
@@ -487,7 +403,7 @@ class Bunny extends Sprite{
     	if ( chance > range && chance < range + mutationrate) {
 
     	    System.out.println("MUTATION! IN BUNNY " + bunnyID + "( options )");
-    	    int genetomutate = gen.nextInt( 6);	    
+    	    int genetomutate = gen.nextInt( 7);	    
     	    int mutategeneto = gen.nextInt( 2);
 
     	    if( mutategeneto != 1){
@@ -504,86 +420,6 @@ class Bunny extends Sprite{
     	return temp; 
     }
 
-    //this is the genetic crossover algorithm for movement with one crossover point
-    public int[][] movementChildrenSingle( Bunny mother, Bunny father, int mutationrate){
-
-    	int[][] temp = new int[8][2];
-    	for (int i = 0; i < father.movement_chromosome.length/2; i++) {
-
-	    temp[i][0] = father.movement_chromosome[i][0];
-	    temp[i][1] = father.movement_chromosome[i][1];
-	}
-	
-	for (int i = mother.movement_chromosome.length/2; i < 8; i++) {
-
-	    temp[i][0] = mother.movement_chromosome[i][0];
-	    temp[i][1] = mother.movement_chromosome[i][1];
-	}
-	
-	//get a one in a thousand value
-	int chance = gen.nextInt( 1000);
-
-	//generate a random range - between this plus mutationrate
-	int range = gen.nextInt( 1000 - mutationrate);
-
-	//if chance is within the range then there is a collision and a mutation must be applied to
-	// a random option
-	if ( chance > range && chance < range + mutationrate) {
-
-	    System.out.println("MUTATION! IN BUNNY " + bunnyID + " (movement) ");
-	    int genetomutate = gen.nextInt( 8);
-	    int mutategenetox = gen.nextInt( 8);
-	    int mutategenetoy = gen.nextInt( 8);
-	    temp[genetomutate][0] = mutategenetox;
-	    temp[genetomutate][1] = mutategenetoy;
-	}
-	
-	return temp;
-    }
-    
-    //as above but with two crossover points
-    public int[][] movementChildrenDouble( Bunny mother, Bunny father, int mutationrate){
-
-	int[][] temp = new int[8][2];
-	for (int i = 0; i < 3; i++) {
-
-	    temp[i][0] = father.movement_chromosome[i][0];
-	    temp[i][1] = father.movement_chromosome[i][1];
-	}
-	
-	for (int i = 3; i < 6; i++) {
-
-	    temp[i][0] = mother.movement_chromosome[i][0];
-	    temp[i][1] = mother.movement_chromosome[i][1];
-	}
-
-        for (int i = 6; i < 8; i++) {
-
-	    temp[i][0] = father.movement_chromosome[i][0];
-	    temp[i][1] = father.movement_chromosome[i][1];
-	}
-	
-	//get a one in a thousand value
-	int chance = gen.nextInt( 1000);
-
-	//generate a random range - between this plus mutationrate
-	int range = gen.nextInt( 1000 - mutationrate);
-
-	//if chance is within the range then there is a collision and a mutation must be applied to
-	// a random option
-	if ( chance > range && chance < range + mutationrate) {
-
-	    System.out.println("MUTATION! IN BUNNY " + bunnyID + " (movement) ");
-	    int genetomutate = gen.nextInt( 8);
-	    int mutategenetox = gen.nextInt( 8);
-	    int mutategenetoy = gen.nextInt( 8);
-	    temp[genetomutate][0] = mutategenetox;
-	    temp[genetomutate][1] = mutategenetoy;
-	}
-	
-	return temp;
-    }
-    
     //this function is essentially the bunnies vision, anything in its field of view
     //it will be given a choice of what to go for
     void updateVision( Tile[][] map){
@@ -641,7 +477,7 @@ class Bunny extends Sprite{
 
 		    //bunny must not choose itself as a suitor
 		    if( bunnyID != bunnyswarm.get(n).bunnyID)
-		    suitors.add( bunnyswarm.get(n));
+			suitors.add( bunnyswarm.get(n));
 		}
 	    }
 	}
@@ -719,8 +555,8 @@ class Bunny extends Sprite{
         return false;
     }
 
-    //walk to 'nextNode', go through whats available within range of bunny vision and determine a priority - food or water
-    //repeat for 'grazecycles' amount of time
+    //go through whats available within range of bunny vision and determine a priority - food, water or nearestbunny
+    //this is cycled so as to keep the bunny sticking to tasks
     void priorities( ArrayList<Bunny>swarm){
 
 	//make sure that if the bunny can breed then that bunny is looking for suitors
@@ -743,80 +579,74 @@ class Bunny extends Sprite{
 		System.out.println(bunnyID + " Is pregnant!");
 	    }
 	}else{
-	    
-        if( !graze()){
 
-	    walk = true;
-       
-	}else{
-
-	    walk = false;
-	}
-
-	if(walk){
-
-	    if(nextNode()){
-
-		presentCycle = 0;
-		presentNode++;
-
-		if (presentNode >= totalNodes) {
-
-		    presentNode = 0;
-		}
-	    }
-	}
-	}
+	    graze();
+	}    
     }
 
     //designed to work with nextNode function in priorities, if theres both food and water in range then chances of going to which
     //recource are determined by the bunny agents hungryness or thirstyness
-    boolean graze(){
+    void graze(){
 
-	if( presentCycle <= grazecycles){
+	if( cycles <= grazecycles ){
 	    
 	    if(waterInRange() && !grassInRange()){
  
 		gotoWater();
+		cycles++;
 	    }else if(grassInRange() && !waterInRange()){
 
 		gotoGrass();
+		cycles++;
 	    }else if( grassInRange() && waterInRange()){
 
-		//generate a chance of choosing water over grass based on hungryness or thirstyness
-		int val = gen.nextInt( hungryness + thirstyness) + 0;
+	        //generate a chance of going to dring or eaten
+		boolean[] chanceofdrink = new boolean[totalcapacity];
 
-		if( val < thirstyness){
+		for (int i = 0; i < thirstyness; i++) {
+
+		    chanceofdrink[i] = true;
+		}
+
+		int chance = gen.nextInt( totalcapacity);
+		
+		if( chanceofdrink[chance]){
 
 		    gotoWater();
-		}else{
+		    cycles++;
+		}else if( !chanceofdrink[chance]){
 
 		    gotoGrass();
+		    cycles++;
+		}else if(nearestBunny != null){
+
+		    cycles++;
+		}else{
+
+		    //do something with a bunny that has got nothing!
+		    //like go to another node
+		    goTo( map[gen.nextInt(bx)][gen.nextInt(by)]);
 		}
-		
+	    }
+	}else{
+
+	    if (nearestBunny == null || concenration > 140) {
+
+		cycles = 0;
+		concenration = 0;
 	    }else{
 
-		walk = true;
+		if(circularCollision( nearestBunny, socialness)) {
+
+		    cycles = 0;
+		}else{
+		    
+		    goTo( nearestBunny);
+
+		    //this is just to avoid bunnies getting stuck searching for another bunny
+		    concenration++;
+		}		   
 	    }
-
-	    return true;
-	}else{
-	    
-	    return false;
-	}
-    }
-
-    boolean nextNode(){
-
-	
-	if( checkCollision( path.get(presentNode))){
-
-	    presentCycle++;
-	    return true;
-	}else{
-
-	    pointToTwo( path.get(presentNode));
-	    return false;
 	}
     }
 
@@ -855,6 +685,7 @@ class Bunny extends Sprite{
 		    setAcceleration(2);
 		    penalty = 0;
 		    grazecycles = 100;
+		    System.out.print("'");
 		}
 	    }else{
 
@@ -899,6 +730,7 @@ class Bunny extends Sprite{
 		    setVelocity(1 * metabolism);
 		    setAcceleration(2);
 		    penalty = 0;
+		    System.out.print("#");
 		}
 	    }else{
 
@@ -981,11 +813,11 @@ class Bunny extends Sprite{
     //bunny is busy until arrives at target sprite
     boolean goTo( Bunny choice){
 
-	    pointToTwo(choice);
-	    if( !checkCollision( choice)){
+	pointToTwo(choice);
+	if( !checkCollision( choice)){
 
-		return true;
-	    }
+	    return true;
+	}
 	
 	return false;
     }
@@ -995,90 +827,22 @@ class Bunny extends Sprite{
 	if( selected){
 
 	    g.setColor(Color.RED);
-	      for (int i = 0; i < kernel.length; i++) {
+	    for (int i = 0; i < kernel.length; i++) {
 
-                    //Bunny Vision X or Y to find which tiles the bunny can see
-                    int bvx = collidingTile.xtile + kernel[i][0];
-                    int bvy = collidingTile.ytile + kernel[i][1];
+		//Bunny Vision X or Y to find which tiles the bunny can see
+		int bvx = collidingTile.xtile + kernel[i][0];
+		int bvy = collidingTile.ytile + kernel[i][1];
 
-                    for (int x = 0; x < map.length; x++) {
-                        for (int y = 0; y < map[x].length; y++) {
+		for (int x = 0; x < map.length; x++) {
+		    for (int y = 0; y < map[x].length; y++) {
 
-                            if( map[x][y].xtile == bvx && map[x][y].ytile == bvy){
+			if( map[x][y].xtile == bvx && map[x][y].ytile == bvy){
 
-				g.drawRect( map[x][y].getPosX(), map[x][y].getPosY(), map[x][y].getWidth(), map[x][y].getHeight());
-                            }
-                        }
-                    }
-                }
+			    g.drawRect( map[x][y].getPosX(), map[x][y].getPosY(), map[x][y].getWidth(), map[x][y].getHeight());
+			}
+		    }
+		}
+	    }
 	}
     }
-
-    /*/this are matrices for a bunny facing north, I will have to remember how to either rotate or do four more kernels
-    //in the meantime I will movmove on
-    int[][] getVision(){
-
-	switch( vision){
-
-	case 1:
-
-	    int[][] v1 = {{-1, -1},{ 0, -1},{ 1, -1},{-1, 0},{ 0, 0},{ 1, 0},{-1, 1},{ 0, 1},{ 1, 1}};
-	    return v1;
-	case 2:
-
-	    int[][] v2 = {{-1, -1},{ 0, -1},{ 1, -1},{-1, 0},{ 0, 0},{ 1, 0},{-1, 1},{ 0, -2},{ 1, 1}};
-	    return v2;
-	case 3:
-
-	    int[][] v3 = {{-1, -1},{ 0, -2},{ 1, -1},{-2, 0},{ 0, 0},{ 2, 0},{-1, 1},{ 0, 2},{ 1, 1}};
-	    return v3;
-	case 4:
-
-	    int[][] v4 = {{-1, -1},{ 0, -1},{ 1, -1},{-1, 0},{ 0, 0},{ 1, 0},{ 0, 2},{ 0, 1},{ 0, 3}};
-	    return v4;
-	case 5:
-
-	    int[][] v5 = {{-1, -1},{ 0, -1},{ 1, -1},{-1, 0},{ 0, 0},{ 1, 0},{ 0, -2},{ 0, 1},{ 0, -3}};
-	    return v5;
-	case 6:
-
-	    int[][] v6 = {{ 0, -2},{ 0, -1},{ 2, 0},{-1, 0},{ 0, 0},{ 1, 0},{-2, 0},{ 0, 1},{ 0, 2}};
-	    return v6;
-	case 7:
-
-	    int[][] v7 = {{ 0, -2},{ 0, -1},{ 0, 2},{-1, 0},{ 0, 0},{ 1, 0},{0, -4},{ 0, 1},{ 0, -3}};
-	    return v7;
-
-	case 8:
-
-	    int[][] v8 = {{ 0, -2},{ 0, -1},{ 1, -1},{-1, 0},{ 0, 0},{ 1, 0},{0, -4},{ -1, -1},{ 0, -3}};
-	    return v8;
-
-	case 9:
-
-	    int[][] v9 = {{ 0, -2},{ 0, -1},{ 1, -1},{-2, -2},{ 0, 0},{ 2, -2},{0, -4},{ -1, -1},{ 0, -3}};
-	    return v9;
-
-	case 10:
-
-	    int[][] v0 = {{ 0, -2},{ 0, -1},{ 1, -1},{-1, -2},{ 0, 0},{ 1, -2},{0, -4},{ -1, -1},{ 0, -3}};
-	    return v0;
-	}
-
-	//return default vision if theres a bug
-	System.out.println("Bunny vision is not being assigned properly");
-	int[][] vd = {{-1, -1},{ 0, -1},{ 1, -1},{-1, 0},{ 0, 0},{ 1, 0},{-1, 1},{ 0, 1},{ 1, 1}};
-	return vd;
-    }
-
-      //this function might a rotational matrix to return a rotated kernel based on the angle the bunny is facing
-      int[][] rotateVision(){
-
-      double angle = Math.toRadians(-90);
-      double cos = Math.cos(angle);
-      double sin = Math.sin(angle);
-
-
-      }
-    */
 }

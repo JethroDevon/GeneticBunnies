@@ -19,6 +19,10 @@ public class Menu{
 
             //first thing to happen base class must be initialised
             buttons.add(new Sprite("run", "imgs/run.png", 1, 2));
+	    buttons.add(new Sprite("maptype", "imgs/maptype.png", 1, 2));
+	    buttons.add(new Sprite("random", "imgs/random.png", 1, 2));
+	    buttons.add(new Sprite("genetic", "imgs/genetic.png", 1, 2));
+	    buttons.add(new Sprite("breeding", "imgs/breeding.png", 1, 2));
 	    buttons.add(new Sprite("exit", "imgs/exit.png", 1, 2));
 	    buttons.add(new Sprite("pointer", "imgs/pointer.png", 1, 2));
             initMenu();
@@ -38,7 +42,7 @@ public class Menu{
             buttons.get(x).setWH( buttons.get(x).getWidth()/2, buttons.get(x).getHeight() / 2);
 
              //sets the positions relativley to the screen, draws them a little apart also to avoid pointer clicking two at once, that distance is calculated relativley
-             buttons.get(x).setXY( (WIDTH/2) - (buttons.get(x).getWidth()/2), HEIGHT/60 + (buttons.get(x).getHeight() + HEIGHT/10 ) * (1 + x) );
+             buttons.get(x).setXY( (WIDTH/2) - (buttons.get(x).getWidth()/2), HEIGHT/40 + (buttons.get(x).getHeight() + HEIGHT/17 ) * (1 + x) );
 
     	}
 
@@ -70,7 +74,16 @@ public class Menu{
                     if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("run")){
 
                         return 1;
-                    }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("credits")){
+                    }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("random")){
+
+                        return 2;
+                    }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("genetic")){
+
+                        return 3;
+                    }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("breeding")){
+
+                        return 4;
+                    }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("maptype")){
 
                         return 5;
                     }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("exit")){

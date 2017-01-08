@@ -31,7 +31,7 @@ import javax.imageio.ImageIO;
 public class Game extends Canvas implements Runnable{
 
     //screen size variables initialised in constructor
-    private int WIDTH, HEIGHT, mouseX, mouseY;
+    private int WIDTH, HEIGHT, mouseX, mouseY, maptype;
 
     //thses two objects are the key lelements of the clipping blitting method
     private BufferStrategy bs;
@@ -48,7 +48,7 @@ public class Game extends Canvas implements Runnable{
     Graphs BunnyLifeTime, WaterConsumption, FoodConsumption, ThirstDeaths, HungerDeaths, TotalLife, TotalMaturities, Births;
 
     //flag to end menu options
-    boolean startFlag, menu, credits, simulation, L, H, T, F, X, M, B;
+    boolean startFlag, menu, credits, simulation, L, H, T, F, X, M, B, random, genetic, breeding;
 
     //this stores the last up down left or right arrow to be pressed   //as lUP, lDown, lRight, lLeft,
     //or if the arrows are activley being pressed it stores
@@ -106,14 +106,13 @@ public class Game extends Canvas implements Runnable{
 	Births = new Graphs( Color.pink, "BIRTHS", "", "", 10, 60, 500, 300);
 	
 	try{
-	  
-            //initialise menu object bunny object and Tiles objects
-            options = new Menu( WIDTH, HEIGHT);
-            tiles = new Tiles( 10, 10);
 
-            //initialise the bunny manager object with number of bunnies, screen bounds and finite or infinate search space
-      
+	    //initialise menu object bunny object and Tiles objects
+	    options = new Menu( WIDTH, HEIGHT);	
+            tiles = new Tiles( 10, 10, maptype);
             bmanager = new BunnyManager( 16, tiles.getWidth(), tiles.getHeight(), true, tiles.tiles);
+	         
+            //initialise the bunny manager object with number of bunnies, screen bounds and finite or infinate search space
 	    menuBackground = ImageIO.read( new File( "imgs/background.png"));
 
         }catch( Exception e){
@@ -131,7 +130,7 @@ public class Game extends Canvas implements Runnable{
         //try catch block
         try {
 
-            //if buffer is not initialised ccreates new buffer to draw over
+            //if buffer is not initialised creates new buffer to draw over
             if( bs == null){
 
                 //use one or two layers to buffer sprites if needed
@@ -158,12 +157,12 @@ public class Game extends Canvas implements Runnable{
 	
 	if (round < 2) {
 
-	    graphics.drawString( "Graphs available after", WIDTH - 170, 100);
-	    graphics.drawString( "round 2", WIDTH - 110, 113);
+	    graphics.drawString( "Graphs available after", WIDTH - 150, 100);
+	    graphics.drawString( "round 2", WIDTH - 130, 113);
 	}else{
 
-	    graphics.drawString( "Press L F T H X M B", WIDTH - 110, 100);
-	    graphics.drawString( "for graphs", WIDTH - 100, 113);
+	    graphics.drawString( "Press L F T H X M B", WIDTH - 150, 100);
+	    graphics.drawString( "for graphs", WIDTH - 130, 113);
 	}
 	
         graphics.drawString( "Press numbers 1 - 9", WIDTH - 150, 135);
@@ -173,7 +172,7 @@ public class Game extends Canvas implements Runnable{
 	//draw display
 	tiles.drawGrid(graphics);
         tiles.showFood(graphics, bmanager.bunnyswarm, bmanager.deadbunnies);
-        graphics.drawImage( options.buttons.get(2).getFrame(), mouseX, mouseY, 20,20, null);
+	graphics.drawImage( options.buttons.get(6).getFrame(), mouseX, mouseY, 20,20, null);
 	
 	//starts a new game after recording importand bunny data
 	if( bmanager.bunnyFunctions(tiles.tiles, graphics)){
@@ -188,11 +187,12 @@ public class Game extends Canvas implements Runnable{
 	    TotalLife.addEntry( bmanager.totalLife());
 	    TotalMaturities.addEntry( bmanager.totalMaturities());
 	    Births.addEntry( bmanager.totalBirths());
-	    bmanager = new BunnyManager( bmanager, tiles.tiles, 30);
+	    bmanager = new BunnyManager( bmanager, tiles.tiles, 30, breeding);
 	    round ++;
+	    
 	    try{
 		
-		tiles = new Tiles( 10, 10);
+		tiles = new Tiles( 10, 10, maptype);
 	    }catch( Exception e){
 
 		System.out.println(e.toString());
@@ -392,18 +392,60 @@ public class Game extends Canvas implements Runnable{
 
         public void mouseClicked(MouseEvent e) {
 
+	    //add a write to menu function one day
             if(options.getButton() == 1 && startFlag){
 
-                menu = false;
+                menu = false;		
                 credits = false;
                 startFlag = false;
                 simulation = true;
+		
                 System.out.println( "Starting Simulation");
+            }else if( options.getButton() == 2 && startFlag){
+
+                random = true;
+	    	genetic = false;
+	    	breeding = false;
+                System.out.println( "Random Bunnies");
+            }
+	    else if( options.getButton() == 3 && startFlag){
+
+                random = false;
+	    	genetic = true;
+	    	breeding = false;
+                System.out.println( "Genetic Bunnies");
+            }else if( options.getButton() == 4 && startFlag){
+
+                random = false;
+	    	genetic = false;
+	    	breeding = true;
+                System.out.println( "Breeding Bunnies");
             }else if( options.getButton() == 5 && startFlag){
 
-                credits = true;
-                startFlag = false;
-                System.out.println( "Credits");
+                maptype++;
+
+	        switch(maptype){
+		case 0:
+
+		    System.out.println("small watering hole");
+		    break;
+
+		case 1:
+
+		    System.out.println("small large hole");
+		    break;
+
+		case 2:
+
+		    System.out.println("two small watering holes");
+		    break;
+		  
+		}
+
+		if (maptype > 2) {
+
+		    maptype = 0;
+		}
             }else if(options.getButton() == 6){
 
                 System.out.println("Program deliberatley exited by user.");
@@ -413,23 +455,6 @@ public class Game extends Canvas implements Runnable{
                 //change if a network connection is implemented
                 System.exit(0);
             }
-
-	    if ( !menu || !credits) {
-
-		for (int i = 0; i < bmanager.bunnyswarm.size(); i++) {
-
-		    if ( options.buttons.get(2).circularCollision(bmanager.bunnyswarm.get(i),100)) {
-
-			if (bmanager.bunnyswarm.get(i).selected == false) {
-
-			    bmanager.bunnyswarm.get(i).selected = true;
-			}else{
-
-			    bmanager.bunnyswarm.get(i).selected = true;
-			}
-		    }
-		}
-	    }
         }
 
         public void mouseEntered(MouseEvent e) {

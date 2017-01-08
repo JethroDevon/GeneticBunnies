@@ -16,7 +16,6 @@ import java.awt.image.ImageProducer;
 import java.awt.image.PixelGrabber;
 import java.awt.image.RGBImageFilter;
 
-
 class TestSprite extends JFrame{
 
 	Game game;

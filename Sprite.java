@@ -654,6 +654,11 @@ public class Sprite{
 		return Math.toDegrees( Math.atan2( _sprite.getPosY() - getPosY(), _sprite.getPosX() - getPosX()));
 	}
 
+    public double getDistance( Sprite _sprite){
+
+	return Math.sqrt(( ( _sprite.getPosX() - getPosX())^2) + ((_sprite.getPosY() - getPosY())^2));
+    }
+
 
 	//this function moves the sprite one unit towards its present vector each time it is called each time it is called
 	public void moveSprite(){

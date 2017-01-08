@@ -17,7 +17,7 @@ class BunnyManager{
     public ArrayList<Integer>populationsize = new ArrayList<Integer>();
     public ArrayList<Integer>bestbunny = new ArrayList<Integer>();
 
-    boolean infinatespace, finitespace, extinct;
+    boolean infinatespace, finitespace, extinct, breeding;
 
     Bunny breeder;
 
@@ -58,11 +58,14 @@ class BunnyManager{
 
     //this constructor takes a previous constructor as an argument and finds the best bunnies to apply
     //genetic crossover with
-    public BunnyManager( BunnyManager bm, Tile[][] _map, int _mutationrate){
+    public BunnyManager( BunnyManager bm, Tile[][] _map, int _mutationrate, boolean _breeding){
 
 	lastBM = bm;
 	mutationrate = _mutationrate;
 	map = _map;
+
+	//enables or disables breeding
+	breeding = _breeding;
 	
 	//avoid having a linked list going on too long
 	lastBM.lastBM = null;
@@ -169,7 +172,7 @@ class BunnyManager{
 	   	 
 	    int bunnynum = bunnyswarm.size() + 1;
 
-	    if( bunnyswarm.size() < 32){
+	    if( bunnyswarm.size() < 16){
 		
 		//elite bunnies but with a much higher mutation rate
 		for (int i = 0; i < 4; i++) {
@@ -186,8 +189,7 @@ class BunnyManager{
 		for (int q = 0; q < bunnyswarm.size(); q++) {
 		    if (i != q) {
 			if ( compareArray( bunnyswarm.get(i).option_chromosome, bunnyswarm.get(q).option_chromosome) &&
-			     (compare2DArray( bunnyswarm.get(i).movement_chromosome,  bunnyswarm.get(q).movement_chromosome) ||
-			      compare2DArray(  bunnyswarm.get(i).vision_chromosome,  bunnyswarm.get(q).vision_chromosome))) {
+			    compare2DArray(  bunnyswarm.get(i).vision_chromosome,  bunnyswarm.get(q).vision_chromosome)) {
 
 			    //  System.out.println("Duplicate bunny "+ bunnyswarm.get(q).bunnyID +" removed");
 			    bunnyswarm.remove(q);
@@ -525,6 +527,23 @@ class BunnyManager{
 	return id;
     }
 
+    Bunny assignNearest( Bunny startbun){
+
+	Bunny temp = null;
+        double distance = 99999;
+	
+	for (int i = 0; i < bunnyswarm.size(); i++) {
+
+	    if( distance > startbun.getDistance( bunnyswarm.get(i)) && bunnyswarm.get(i).bunnyID != startbun.bunnyID ) {
+
+		temp = bunnyswarm.get(i);
+		distance = startbun.getDistance( bunnyswarm.get(i));
+	    }
+	}
+	
+	return temp;
+    }
+
     public boolean isSuitorDead( Bunny hopefull){
 
 	if (hopefull.suitor == null) {
@@ -567,6 +586,7 @@ class BunnyManager{
                 bunnyswarm.get(i).pollConditions("ANGLE");
                 bunnyswarm.get(i).displayState(g);
 		bunnyswarm.get(i).showVision( g, tiles);
+		bunnyswarm.get(i).nearestBunny = assignNearest( bunnyswarm.get(i));
 
 		//if the bunny has chosen a potential father for breeding make sure he is not dead
 		if (isSuitorDead( bunnyswarm.get(i))) {
@@ -609,7 +629,7 @@ class BunnyManager{
                 bunnyswarm.get(i).moveSprite();
 
 		//handle breeding here to avoid out of range errors
-		if (breeder != null) {
+		if (breeder != null && breeding) {
 
 		    bunnyswarm.add(new Bunny( bun_tracker++, bunnyswarm.get(i), breeder, WIDTH, HEIGHT, map, mutationrate));
 		    bunnyswarm.get( bunnyswarm.size()).setAngle( bunnyswarm.get(i).getAngle());

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 class Tiles extends Sprite{
 
     //tiles across by tiles down, size of the tiles
-    int mwidth, mheight, tilesize;
+    int mwidth, mheight, tilesize, mapType;
 
     //this will store each individual tile for logic and display
     Tile[][] tiles;
@@ -15,10 +15,11 @@ class Tiles extends Sprite{
     int[][] kernel = {{-1, -1},{ 0, -1},{ 1, -1},{-1, 0},{ 0, 0},{ 1, 0},{-1, 1},{ 0, 1},{ 1, 1}};
 
     //constructor 1 for tiles function, has default water location
-    public Tiles( int _width, int _height) throws Exception{
+    public Tiles( int _width, int _height, int _mt) throws Exception{
 
         super( "tilesheet", "imgs/tileIMGs.png", 4, 3);
 
+	mapType = _mt;
         mwidth = _width;
         mheight = _height;
 
@@ -46,7 +47,19 @@ class Tiles extends Sprite{
                 }
             }
 
-            createWateringHole( mwidth/3, mheight/3);
+	    if ( mapType == 0) {
+
+		createWateringHole( mwidth/3, mheight/3);
+		 
+	    }else if( mapType == 1){
+
+		createLargeWateringHole( mwidth/3, mheight/3);
+	    }else if( mapType == 2){
+
+		createTwoHoles();
+	    }
+	    
+           
         }catch( Exception e){
 
             System.out.println("Error generating map tiles");
@@ -75,7 +88,7 @@ class Tiles extends Sprite{
             for(int y = 0; y < tiles[x].length; y++){
 
                 if(tiles[x][y].getName() == "grass" && tiles[x][y].food > 0)
-                tiles[x][y].drawString(g, String.valueOf(tiles[x][y].food), 0, 20);
+		    tiles[x][y].drawString(g, String.valueOf(tiles[x][y].food), 0, 20);
             }
         }
 
@@ -134,6 +147,21 @@ class Tiles extends Sprite{
     //creates a new watering hole in a random place each round
     public void createRandomHoles( int range){
 
+    }
+
+    //creates a new watering hole in a random place each round make this as OOP as everything else later
+    public void createTwoHoles(){
+
+	tiles[2][(mheight/3)].changeTileType( "water", getFrame(3));
+	tiles[3][(mheight/3)].changeTileType( "water", getFrame(1));
+	tiles[2][(mheight/3) +1].changeTileType( "water", getFrame(4));
+	tiles[3][(mheight/3) +1].changeTileType( "water", getFrame(2));
+
+	    
+	tiles[7][(mheight/3)].changeTileType( "water", getFrame(3));
+	tiles[8][(mheight/3)].changeTileType( "water", getFrame(1));
+	tiles[7][(mheight/3) +1].changeTileType( "water", getFrame(4));
+	tiles[8][(mheight/3) +1].changeTileType( "water", getFrame(2));
     }
 
     //create a small single watering hole in the centre of the screen
