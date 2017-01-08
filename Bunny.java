@@ -715,9 +715,9 @@ class Bunny extends Sprite{
 
 		    penalty++;
 		    eatenTiles.add(choice);
-		    hunger += 10 + metabolism;
-		    foodEaten += 10 + metabolism;
-		    totalfoodconsumed += 10 + metabolism;
+		    hunger += 10 + metabolism/2;
+		    foodEaten += 10 + metabolism/2;
+		    totalfoodconsumed += 10 + metabolism/2;
 		    setVelocity(0);
 		    setAcceleration(0);
 
@@ -761,7 +761,7 @@ class Bunny extends Sprite{
 	int thirstTax = Math.abs( watercapacity - thirst);
 	int hungerTax = Math.abs( foodcapacity - hunger);
 
-	health -= ( hungerTax + thirstTax) * (1 + metabolism/2);
+	health -= ( hungerTax + (thirstTax/2)) * (1 + metabolism/2);
 	thirst-=2;
 	hunger--;
 	
