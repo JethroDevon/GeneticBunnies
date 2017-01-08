@@ -57,6 +57,9 @@ class Tiles extends Sprite{
 	    }else if( mapType == 2){
 
 		createTwoHoles();
+	    }else if( mapType == 3){
+
+		bunnyIsland();
 	    }
 	    
            
@@ -198,6 +201,37 @@ class Tiles extends Sprite{
             System.out.println("Error making sandPatch!");
         }
 
+    }
+
+    public void bunnyIsland(){
+
+	//will add  the other frames later to tidy everything up
+	for (int i = 0; i < mwidth; i++) {
+
+	      tiles[i][0].changeTileType( "water", getFrame(9));
+	}
+
+	for (int i = 0; i < mwidth; i++) {
+
+	      tiles[i][mheight-1].changeTileType( "water", getFrame(6));
+	}
+
+        for (int i = 0; i < mheight; i++) {
+
+	      tiles[0][i].changeTileType( "water", getFrame(8));
+	}
+
+	for (int i = 0; i < mheight; i++) {
+
+	      tiles[mwidth-1][i].changeTileType( "water", getFrame(7));
+	}
+
+	tiles[0][0].changeTileType( "water", getFrame(5));
+	tiles[mwidth-1][mheight-1].changeTileType( "water", getFrame(5));
+        tiles[mwidth-1][0].changeTileType( "water", getFrame(5));
+	tiles[mwidth-1][mheight-1].changeTileType( "water", getFrame(5));
+        tiles[0][mheight-1].changeTileType( "water", getFrame(5));
+	tiles[mwidth-1][mheight-1].changeTileType( "water", getFrame(5));
     }
 
     public int getWidth(){

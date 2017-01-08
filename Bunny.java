@@ -518,10 +518,10 @@ class Bunny extends Sprite{
 
 	if ( pregnancyCycle >= gestation) {
 
-	    System.out.println("birth!");
+	    System.out.print("B");
 	    pregnant = false;
 	    pregnancyCycle = 0;
-	    foodEaten -= 400;
+	    foodEaten -= 200;
 	    hunger -= 200;
 	    thirst = watercapacity;
 	    births++;
@@ -576,7 +576,7 @@ class Bunny extends Sprite{
 		suitor = null;
 		canbreed = false;
 
-		System.out.println(bunnyID + " Is pregnant!");
+		System.out.print("P");
 	    }
 	}else{
 

@@ -65,6 +65,15 @@ class Graphs{
 		g.drawLine( verticalSpace * i, (y + sizeY) - (processedData.get(i) * range), verticalSpace * (i + 1), (y + sizeY) - (processedData.get(i + 1) * range));
 	    }
 	}
+
+	//trim data array down so to as not to make it so hard to read
+	if ( data.size() > 70) {
+
+	    for (int i = 0; i < 10; i++) {
+
+		data.remove(i);
+	    }
+	}
     }
 
     public int getLowest(){

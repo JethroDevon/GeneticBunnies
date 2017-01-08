@@ -75,77 +75,7 @@ class BunnyManager{
 	//the following block is written in an ugly scripted way because a lot of experimentation goes on here
 	try{
 
-	    ArrayList<Bunny> specialbuns = new ArrayList<Bunny>();
-	    
-	    //adds each bunny that gave birth to an array of bunnies for breeding in the next round
-	    for (int i = 0; i < lastBM.deadbunnies.size(); i++) {
-
-		int past = lastBirthsID();
-		if (past != -1) {
-
-		    specialbuns.add( popPastDeadBunny(past));
-		}
-            }
-
-	    System.out.println(" pregnancies last round:" + specialbuns.size());
-
-	    if( specialbuns.size() > 1){
-
-		System.out.println( specialbuns.size() + " special breeding bunnies selected");
-		for (int i = 0; i < specialbuns.size(); i++) {
-		    for (int x = 0; x < specialbuns.size(); x++) {
-
-			if( i != x){
-
-			    bunnyswarm.add(new Bunny( bunnyswarm.size(), specialbuns.get(i), specialbuns.get(x), WIDTH, HEIGHT, map, mutationrate));
-			}
-		    }
-		}
-	    }
-	   
-	    if (bunnyswarm.size() > 16) {
-
-		bunnyswarm.clear();
-		ArrayList<Bunny>elites = new ArrayList<Bunny>();
-		
-		//select the bunnies who have had the most births
-		for (int i = 0; i < specialbuns.size(); i++) {
-
-		    if (specialbuns.get(i).births > 1) {
-
-			elites.add(specialbuns.get(i));
-		    }
-		}
-
-		System.out.println( specialbuns.size() + "elite breeding bunnies selected");
-		
-		for (int i = 0; i < specialbuns.size(); i++) {
-		    for (int x = 0; x < specialbuns.size(); x++) {
-
-			if( i != x && elites.size() < 16){
-
-			   elites.add(new Bunny( bunnyswarm.size(), specialbuns.get(i), specialbuns.get(x), WIDTH, HEIGHT, map, mutationrate));
-			}
-		    }
-		}
-
-		for (int i = 0; i < elites.size(); i++) {
-
-		    bunnyswarm.add( elites.get(i));
-		}
-		
-		for (int i = 0; i < specialbuns.size(); i++) {
-		    for (int x = 0; x < specialbuns.size(); x++) {
-
-			if( i != x && bunnyswarm.size() < 16){
-
-			    bunnyswarm.add(new Bunny( bunnyswarm.size(), specialbuns.get(i), specialbuns.get(x), WIDTH, HEIGHT, map, mutationrate));
-			}
-		    }
-		}
-		
-	    }
-
+	 
 	    //algorithm starts just by keeping the bunnies that live the longest
 	    if( bunnyswarm.size() < 16){
 
@@ -163,6 +93,13 @@ class BunnyManager{
 		bunnyswarm.add(new Bunny( bunnyswarm.size(), mother, father, WIDTH, HEIGHT, map, mutationrate));
 		bunnyswarm.add(new Bunny( bunnyswarm.size(), father, mother, WIDTH, HEIGHT, map, mutationrate));
 
+		mother = popPastDeadBunny( bestPastLifeTimeID());
+		father = popPastDeadBunny( bestPastLifeTimeID());
+
+		bunnyswarm.add(new Bunny( bunnyswarm.size(), mother, father, WIDTH, HEIGHT, map, mutationrate));
+		bunnyswarm.add(new Bunny( bunnyswarm.size(), father, mother, WIDTH, HEIGHT, map, mutationrate));
+
+		
 		mother = popPastDeadBunny( bestPastLifeTimeID());
 		father = popPastDeadBunny( bestPastLifeTimeID());
 

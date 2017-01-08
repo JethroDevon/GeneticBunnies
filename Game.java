@@ -440,10 +440,15 @@ public class Game extends Canvas implements Runnable{
 		    System.out.println("two small watering holes");
 		    break;
 		  
+	        case 3:
+
+		    System.out.println("Bunny Island! :D");
+		    break;
 		}
+		    
+		if (maptype > 3) {
 
-		if (maptype > 2) {
-
+		    System.out.println("desert - no good for breeding bunnies");
 		    maptype = 0;
 		}
             }else if(options.getButton() == 6){
