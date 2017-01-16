@@ -52,11 +52,11 @@ class Tiles extends Sprite{
 
 	    if ( mapType == 0) {
 
-		createWateringHole( mwidth/3, mheight/3);
+		createWateringHole( mwidth/3+1, mheight/3+1);
 		 
 	    }else if( mapType == 1){
 
-		createLargeWateringHole( mwidth/3, mheight/3);
+		createLargeWateringHole( mwidth/3+1, mheight/3+1);
 	    }else if( mapType == 2){
 
 		createTwoHoles();
@@ -151,8 +151,13 @@ class Tiles extends Sprite{
 
 	      int num = rand.nextInt(2);
 	      
-	      if( num == 1)
+	      if( num == 1){
+		  
 	        tiles[x][y].food = 50;
+	      }else{
+
+		    tiles[x][y].food = 0;
+	      }
 	  }
         }
     }

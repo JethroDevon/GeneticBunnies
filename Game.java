@@ -31,7 +31,7 @@ import javax.imageio.ImageIO;
 public class Game extends Canvas implements Runnable{
 
     //screen size variables initialised in constructor
-    private int WIDTH, HEIGHT, mouseX, mouseY, maptype, foodscarcity;
+    private int WIDTH, HEIGHT, mouseX, mouseY, maptype = 3, foodscarcity;
 
     //thses two objects are the key lelements of the clipping blitting method
     private BufferStrategy bs;
@@ -45,10 +45,10 @@ public class Game extends Canvas implements Runnable{
     Tiles tiles;
 
     //Graph objects overlay statistics based on the bunny simulation
-    Graphs BunnyLifeTime, WaterConsumption, FoodConsumption, ThirstDeaths, HungerDeaths, TotalLife, TotalMaturities, Births;
+    Graphs BunnyLifeTime, WaterConsumption, FoodConsumption, ThirstDeaths, HungerDeaths, TotalLife, TotalMaturities, Births, SocialGene, GestationGene, HungerGene, ThirstyGene;
 
     //flag to end menu options
-    boolean startFlag, menu, credits, simulation, L, H, T, F, X, M, B, random, genetic, breeding;
+    boolean startFlag, menu, credits, simulation, L, H, T, F, X, M, B, random, genetic, breeding, mature;
 
     //this stores the last up down left or right arrow to be pressed   //as lUP, lDown, lRight, lLeft,
     //or if the arrows are activley being pressed it stores
@@ -123,18 +123,24 @@ public class Game extends Canvas implements Runnable{
 
 
     private void drawGame(){
-
-        //manages multiple drawing to buffer
-        bs = getBufferStrategy();
-
+	
         //try catch block
         try {
+
+	//manages multiple drawing to buffer
+        bs = getBufferStrategy();
+
+	//shows image from buffer
+        bs.show();
+
+        //clears graphics object once has been drawn to buffer to save memory leak
+        graphics.dispose();
 
             //if buffer is not initialised creates new buffer to draw over
             if( bs == null){
 
                 //use one or two layers to buffer sprites if needed
-                createBufferStrategy(2);
+                createBufferStrategy(3);
 
                 //returns buffer to canvas for draw in jpanel
                 return;
@@ -167,12 +173,15 @@ public class Game extends Canvas implements Runnable{
 	
         graphics.drawString( "Press numbers 1 - 9", WIDTH - 150, 135);
 	graphics.drawString( "Bunny vision fields", WIDTH - 145, 147);
+        graphics.drawString( "Breeding mode Stock " + bmanager.breedingstock.size() + " /16 ", WIDTH - 165, 170);
 	graphics.drawString( "Hit ESC for menu", WIDTH - 140, 230);
 
 	//draw display
 	tiles.drawGrid(graphics);
         tiles.showFood(graphics, bmanager.bunnyswarm, bmanager.deadbunnies);
-	graphics.drawImage( options.buttons.get(7).getFrame(), mouseX, mouseY, 20,20, null);
+
+	//draw mouse
+	graphics.drawImage( options.buttons.get(8).getFrame(), mouseX, mouseY, 20,20, null);
 	
 	//starts a new game after recording importand bunny data
 	if( bmanager.bunnyFunctions(tiles.tiles, graphics)){
@@ -187,7 +196,17 @@ public class Game extends Canvas implements Runnable{
 	    TotalLife.addEntry( bmanager.totalLife());
 	    TotalMaturities.addEntry( bmanager.totalMaturities());
 	    Births.addEntry( bmanager.totalBirths());
-	    bmanager = new BunnyManager( bmanager, tiles.tiles, 30, breeding);
+
+	    if( !breeding && !mature){
+
+		bmanager = new BunnyManager( bmanager, tiles.tiles, 30);
+	    }else if(breeding && !mature){
+		
+		bmanager = new BunnyManager( bmanager, tiles.tiles, 30, true);
+	    }else if( !breeding && mature){
+
+	        bmanager = new BunnyManager( bmanager, tiles.tiles, 30, 1);
+	    }
 	    round ++;
 	    
 	    try{
@@ -229,11 +248,6 @@ public class Game extends Canvas implements Runnable{
 	    Births.drawGraph( graphics);
 	}
 
-        //shows image from buffer
-        bs.show();
-
-        //clears graphics object once has been drawn to buffer to save memory leak
-        graphics.dispose();
 
 	//Synchronises drawring on the screen for smoother
         //graphics bliting, try commenting out to see difference -
@@ -406,6 +420,7 @@ public class Game extends Canvas implements Runnable{
                 random = true;
 	    	genetic = false;
 	    	breeding = false;
+		mature = false;
                 System.out.println( "Random Bunnies");
             }
 	    else if( options.getButton() == 3 && startFlag){
@@ -413,14 +428,23 @@ public class Game extends Canvas implements Runnable{
                 random = false;
 	    	genetic = true;
 	    	breeding = false;
+		mature = false;
                 System.out.println( "Genetic Bunnies");
             }else if( options.getButton() == 4 && startFlag){
 
                 random = false;
 	    	genetic = false;
 	    	breeding = true;
+		mature = false;
                 System.out.println( "Breeding Bunnies");
             }else if( options.getButton() == 5 && startFlag){
+
+                random = false;
+	    	genetic = false;
+	    	breeding = false;
+		mature = true;
+                System.out.println( "Mature Bunnies");
+            }else if( options.getButton() == 6 && startFlag){
 
                 maptype++;
 
@@ -451,7 +475,7 @@ public class Game extends Canvas implements Runnable{
 		    System.out.println("desert - no good for breeding bunnies");
 		    maptype = 0;
 		}
-            }else if(options.getButton() == 6){
+            }else if(options.getButton() == 7){
 
                 System.out.println("Program deliberatley exited by user.");
 
@@ -459,7 +483,7 @@ public class Game extends Canvas implements Runnable{
                 //if threads are present must kill threads
                 //change if a network connection is implemented
                 System.exit(0);
-            }else if( options.getButton() == 7 && startFlag){
+            }else if( options.getButton() == 8 && startFlag){
 
                 foodscarcity++;
 

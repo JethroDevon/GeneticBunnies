@@ -7,10 +7,10 @@ class Bunny extends Sprite{
 
     //these are the member variables that make up id number, vision catagory, amount of drink to take in, amount of food to take
     //at the end there are also bunny needs and bunny health and lifetime to store the number of cycles the bunny endured
-    int bx, by, bunnyID, vision, grazecycles, hunger, thirst, health = 600000, cycles, penalty, foodEaten, gestation = 200, pregnancyCycle, socialness, concenration, totalcapacity;
+    int bx, by, bunnyID, vision, grazecycles, hunger, thirst, health = 3900000, cycles, penalty, foodEaten, gestation, pregnancyCycle, socialness, concentration, totalcapacity;
 
     //when the bunny should stop considering self hungry or thristy and choose food or water over the other
-    int watercapacity, foodcapacity, thirstyness, hungryness ,hungrynesspenalty ,thirstynesspenalty, births;
+    int watercapacity, foodcapacity, thirstyness, hungryness ,hungrynesspenalty ,thirstynesspenalty, births, generation, ageatmaturity, amountdrank, fat, maturitydrink, maturityeat;
 
     //metabolism multiplyer for speeding up movement plus deterioration
     int metabolism, totalfoodconsumed;
@@ -27,7 +27,7 @@ class Bunny extends Sprite{
     int[] option_chromosome;
 
     //some important booleans for going to food and drink logic
-    boolean busy, hungry, thirsty, alive, grazing, diedofthirst, diedofhunger, canbreed, drank, pregnant, matured;
+    boolean busy, hungry, thirsty, alive, grazing, diedofthirst, diedofhunger, canbreed, drank, pregnant, matured, cameofage, breeding;
 
     //I plan to implement functions that will have the bunny locate these targets
     Tile collidingTile, centreOfBunnyMass, bestBunny, bestBunnyMass;
@@ -62,11 +62,13 @@ class Bunny extends Sprite{
     	bx = _bx;
     	by = _by;
     	bunnyID = id;
-
+	generation = 0;
+	breeding = true;
+	
 	//assign random starting position and angle
 	setXY( gen.nextInt(bx), gen.nextInt(by));
 	setAngle( gen.nextInt(359));
-	
+
         //bunnies are dead by default! this is to solve the round = problem! much lazy so clever
 	alive = false;
 	
@@ -89,7 +91,10 @@ class Bunny extends Sprite{
         metabolism = option_chromosome[3];
         foodcapacity = 100 * option_chromosome[4];
         watercapacity = 100 * option_chromosome[5];
-	socialness = 100 * (option_chromosome[6] + 1);
+	socialness = 75 * (option_chromosome[6] + 1);
+	gestation = 200 * option_chromosome[7] + 1;
+        maturitydrink = option_chromosome[8];
+	maturityeat = option_chromosome[9];
 
     	//bunny starts fed and watered
         hunger = foodcapacity;
@@ -104,7 +109,6 @@ class Bunny extends Sprite{
         //sprites are created in try catch blocks
         try{
 
-	    gen.setSeed(1234);
             setAcceleration(1);
             setmaxVelocity(1 * metabolism);
             setVelocity(1 * metabolism);
@@ -137,6 +141,7 @@ class Bunny extends Sprite{
     	by = _by;
     	map = _map;
     	bunnyID = id;
+	breeding = true;
     	selected = false;
 	
         //assign random starting position and angle
@@ -153,7 +158,9 @@ class Bunny extends Sprite{
     	vision_chromosome = visionChildrenDouble( mother, father, mutationrate);
     	option_chromosome = optionChildrenDouble( mother, father, mutationrate);
 	kernel = vision_chromosome;
-	System.out.println(" ~ BUNNY NUMBER " + bunnyID + " ~");
+
+	//CAN UNCOMENT REGION TO SEE CHROMOSOMES OF BUNNIES EACH ROUND 	
+	/*System.out.println(" ~ BUNNY NUMBER " + bunnyID + " ~");
 
 	//show vision to see if it has worked
 	System.out.print( " vision: ");
@@ -169,10 +176,11 @@ class Bunny extends Sprite{
 
 	    System.out.print( option_chromosome[i] + " - ");
     	}
+	
     	System.out.println();
     	System.out.println();
-
-    	
+	*/
+ 	
     	hungryness = option_chromosome[0];
         thirstyness = option_chromosome[1];
         grazecycles = option_chromosome[2];
@@ -180,6 +188,9 @@ class Bunny extends Sprite{
         foodcapacity = 100 * option_chromosome[4];
         watercapacity = 100 * option_chromosome[5];
 	socialness = 60 * (option_chromosome[6] + 1);
+	gestation = 200 * option_chromosome[7] + 1;
+	maturitydrink = option_chromosome[8];
+	maturityeat = option_chromosome[9];
 
         //find point between feeling full and time to start eating/drinkning as
     	//totalcapacity - (totalcapacity - hungeryness * 10 % of totalcapacity
@@ -190,12 +201,14 @@ class Bunny extends Sprite{
         hunger = foodcapacity;
         thirst = watercapacity;
         totalcapacity = hungryness + thirstyness;
-	System.out.println();
-
 	
     	//sprites are created in try catch blocks
         try{
-  	  
+
+	    gen.setSeed(1234);
+	    setAcceleration(1);
+            setmaxVelocity(1 * metabolism);
+            setVelocity(1 * metabolism);
             addAngleCondition( 247, 292, 98, 104); //UP
             addAngleCondition( 67, 112, 120, 128);//DOWN
             addAngleCondition( 157, 202, 144, 152);//LEFT
@@ -206,11 +219,7 @@ class Bunny extends Sprite{
             addAngleCondition( 202, 247, 112, 128);//UPLEFT
             addAngleCondition( 112, 157, 136, 144);//DOWNLEFT
             pollConditions("ANGLE");
-
-	    gen.setSeed(1234);
-            setAcceleration(1);
-            setmaxVelocity(1 * metabolism);
-            setVelocity(1 * metabolism);
+	    
     	    //System.out.println( "Bunny number " + bunnyID + " is alive " + alive);
         }catch( Exception e){
 
@@ -220,8 +229,8 @@ class Bunny extends Sprite{
 
     int[] genOptions(){
 
-        int[] temp = new int[7];
-        for (int i = 0; i < 7; i++) {
+        int[] temp = new int[10];
+        for (int i = 0; i < 10; i++) {
 
             temp[i] = gen.nextInt( 9) + 1;
 
@@ -272,7 +281,7 @@ class Bunny extends Sprite{
     	// a random option
     	if ( chance > range && chance < range + mutationrate) {
 
-	    System.out.println("MUTATION! IN BUNNY " + bunnyID + " (vision) ");
+	    //System.out.print("MUTATION!" + bunnyID + " (vision) ");
     	    int genetomutate = gen.nextInt( 8);
     	    int mutategenetox = gen.nextInt( 5) -2;
     	    int mutategenetoy = gen.nextInt( 5) -2;
@@ -316,7 +325,7 @@ class Bunny extends Sprite{
     	// a random option
     	if ( chance > range && chance < range + mutationrate) {
 
-    	    System.out.println("MUTATION! IN BUNNY " + bunnyID + " (vision) ");
+    	    //System.out.println("MUTATION! IN BUNNY " + bunnyID + " (vision) ");
     	    //mutate a gene within range of the middle genes
     	    int genetomutate = gen.nextInt( 6) + 2;
     	    int mutategenetox = gen.nextInt( 5) -2;
@@ -332,14 +341,14 @@ class Bunny extends Sprite{
     //combines two parents to return option genes with a single crossover point, the mutation rate is mutationrate in one thousand
     public int[] optionChildrenSingle( Bunny mother, Bunny father, int mutationrate){
 
-    	int[] temp = new int[7];
+    	int[] temp = new int[10];
 	
     	for (int i = 0; i < father.option_chromosome.length/2; i++) {
 
     	    temp[i] = father.option_chromosome[i];
     	}
 
-    	for (int i = mother.option_chromosome.length/2; i < 7; i++) {
+    	for (int i = mother.option_chromosome.length/2; i < 10; i++) {
 
     	    temp[i] = mother.option_chromosome[i];
     	}
@@ -354,8 +363,8 @@ class Bunny extends Sprite{
     	// a random option
     	if ( chance > range && chance < range + mutationrate) {
 
-    	    System.out.println("MUTATION! IN BUNNY " + bunnyID + "( options )");
-    	    int genetomutate = gen.nextInt( 7);	    
+    	    //System.out.println("MUTATION! IN BUNNY " + bunnyID + "( options )");
+    	    int genetomutate = gen.nextInt( 10);	    
     	    int mutategeneto = gen.nextInt( 2);
 
     	    if( mutategeneto != 1){
@@ -375,19 +384,19 @@ class Bunny extends Sprite{
     //as above but with double crossover points
     public int[] optionChildrenDouble( Bunny mother, Bunny father, int mutationrate){
 
-    	int[] temp = new int[7];
+    	int[] temp = new int[10];
 	
-    	for (int i = 0; i < 2; i++) {
+    	for (int i = 0; i < 3; i++) {
 
     	    temp[i] = father.option_chromosome[i];
     	}
 
-    	for (int i = 2; i < 4; i++) {
+    	for (int i = 2; i < 6; i++) {
 
     	    temp[i] = mother.option_chromosome[i];
     	}
 
-    	for (int i = 4; i < 7; i++) {
+    	for (int i = 4; i < 10; i++) {
 
     	    temp[i] = father.option_chromosome[i];
     	}
@@ -402,8 +411,8 @@ class Bunny extends Sprite{
     	// a random option
     	if ( chance > range && chance < range + mutationrate) {
 
-    	    System.out.println("MUTATION! IN BUNNY " + bunnyID + "( options )");
-    	    int genetomutate = gen.nextInt( 7);	    
+    	    //System.out.println("MUTATION! IN BUNNY " + bunnyID + "( options )");
+    	    int genetomutate = gen.nextInt( 10);	    
     	    int mutategeneto = gen.nextInt( 2);
 
     	    if( mutategeneto != 1){
@@ -505,10 +514,17 @@ class Bunny extends Sprite{
     //however drinking once in the past is saved
     Bunny breedcalculate(){
 
-	if ( !pregnant && foodEaten > 200 && drank) {
+	if ( !pregnant && foodEaten > maturityeat && amountdrank > maturitydrink && !cameofage) {
+
+	    canbreed = breeding;
+	    matured = true;
+	    cameofage = true;
+	    ageatmaturity = cycles;
+	    System.out.print("M");
+	    
+	}else if( !pregnant && foodEaten > maturityeat && amountdrank > maturitydrink && matured){
 
 	    canbreed = true;
-	    matured = true;
 	}
 
 	if ( pregnant) {
@@ -518,14 +534,22 @@ class Bunny extends Sprite{
 
 	if ( pregnancyCycle >= gestation) {
 
-	    System.out.print("B");
+	    System.out.print("- " + bunnyID);
+	    
+	    if (generation > 0) {
+
+		System.out.println(" generation " + generation + " ");
+	    }
+	    
+	    System.out.print("B!-");
+	    maturityeat = 0;
+	    maturitydrink = 0;
 	    pregnant = false;
 	    pregnancyCycle = 0;
-	    foodEaten -= 200;
-	    hunger -= 200;
-	    thirst = watercapacity;
 	    births++;
-	    return father;
+
+	    //returns this bunny as the mother for processing in bunny manager
+	    return this;
 	}
 
 	return null;
@@ -555,8 +579,8 @@ class Bunny extends Sprite{
         return false;
     }
 
-    //go through whats available within range of bunny vision and determine a priority - food, water or nearestbunny
-    //this is cycled so as to keep the bunny sticking to tasks
+    
+    //puts breeding before grazing, grazing works out the priority of eating to drinking
     void priorities( ArrayList<Bunny>swarm){
 
 	//make sure that if the bunny can breed then that bunny is looking for suitors
@@ -600,7 +624,8 @@ class Bunny extends Sprite{
 		cycles++;
 	    }else if( grassInRange() && waterInRange()){
 
-	        //generate a chance of going to dring or eaten
+	        //generate a chance of going to drink or eat based on
+		//thirstyness of bunny
 		boolean[] chanceofdrink = new boolean[totalcapacity];
 
 		for (int i = 0; i < thirstyness; i++) {
@@ -623,17 +648,16 @@ class Bunny extends Sprite{
 		    cycles++;
 		}else{
 
-		    //do something with a bunny that has got nothing!
-		    //like go to another node
-		    goTo( map[gen.nextInt(bx)][gen.nextInt(by)]);
+		    goTo( targets.get(0));
+		    cycles++;
 		}
 	    }
 	}else{
 
-	    if (nearestBunny == null || concenration > 140) {
+	    if (nearestBunny == null || concentration > 80) {
 
 		cycles = 0;
-		concenration = 0;
+		goTo( targets.get(gen.nextInt(8)));
 	    }else{
 
 		if(circularCollision( nearestBunny, socialness)) {
@@ -644,7 +668,7 @@ class Bunny extends Sprite{
 		    goTo( nearestBunny);
 
 		    //this is just to avoid bunnies getting stuck searching for another bunny
-		    concenration++;
+		    concentration++;
 		}		   
 	    }
 	}
@@ -685,6 +709,7 @@ class Bunny extends Sprite{
 		    setAcceleration(2);
 		    penalty = 0;
 		    grazecycles = 100;
+		    amountdrank++;
 		    System.out.print("'");
 		}
 	    }else{
@@ -711,13 +736,25 @@ class Bunny extends Sprite{
 
 		hungry = true;
 
+		//what penalty does is make sure that the bunny eats untill its full and does not want to eat more
 		if(penalty < hungryness && !thirsty){
 
 		    penalty++;
 		    eatenTiles.add(choice);
-		    hunger += 10 + metabolism/2;
-		    foodEaten += 10 + metabolism/2;
-		    totalfoodconsumed += 10 + metabolism/2;
+
+		    if( !pregnant){
+			
+			hunger += 10 + metabolism/2;
+			foodEaten += 10 + metabolism/2;
+			totalfoodconsumed += 10 + metabolism/2;
+		    }else{
+
+			hunger += 5 + metabolism/2;
+			fat += 5;
+			foodEaten += 10 + metabolism/2;
+			totalfoodconsumed += 10 + metabolism/2;
+		    }
+
 		    setVelocity(0);
 		    setAcceleration(0);
 
@@ -742,7 +779,7 @@ class Bunny extends Sprite{
     void displayState( Graphics g){
 
 	g.setColor(Color.WHITE);
-	drawString(g, "ID: " + bunnyID + " H: " + health +" F: " + hunger + " T: " + thirst, -(getWidth()/2), 30);
+	drawString( g, "ID: " + bunnyID + " G: " + generation + " M: " + matured + " P: " + pregnant + " F: " + hunger + " T: " + thirst, - (getWidth()/2), 30);
 
 	//draws a rectangle over the location the bunny is trying to get to if it is trying to get somewhere
 	if(choice != null){
@@ -769,17 +806,21 @@ class Bunny extends Sprite{
 	if( health <  0){
 
 	    alive = false;
-	    System.out.println( bunnyID + " eventually died.");
+	    System.out.print( "E!");
 	}else if( thirst < 0){
 
 	    alive = false;
 	    diedofthirst = true;
-	    System.out.println( bunnyID + " died of thirst.");
-	}else if( hunger < 0){
+	    System.out.print( "T");
+	}else if( hunger < 0 && fat > 10){
+
+	    hunger = fat;
+	    fat = 0;
+	}else if( hunger < 0 && fat < 10){
 
 	    alive = false;
 	    diedofhunger = true;
-	    System.out.println( bunnyID + " died of hunger.");
+	    System.out.print( "H");
 	}
     }
 
@@ -812,6 +853,18 @@ class Bunny extends Sprite{
 
     //bunny is busy until arrives at target sprite
     boolean goTo( Bunny choice){
+
+	pointToTwo(choice);
+	if( !checkCollision( choice)){
+
+	    return true;
+	}
+	
+	return false;
+    }
+
+     //bunny is busy until arrives at target sprite
+    boolean goTo( Sprite choice){
 
 	pointToTwo(choice);
 	if( !checkCollision( choice)){
