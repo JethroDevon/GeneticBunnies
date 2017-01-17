@@ -23,8 +23,9 @@ public class Menu{
 	    buttons.add(new Sprite("random", "imgs/random.png", 1, 2));
 	    buttons.add(new Sprite("genetic", "imgs/genetic.png", 1, 2));
 	    buttons.add(new Sprite("breeding", "imgs/breeding.png", 1, 2));
-	     buttons.add(new Sprite("mature", "imgs/mature.png", 1, 2));
+	    buttons.add(new Sprite("hungry", "imgs/hungry.png", 1, 2));
 	    buttons.add(new Sprite("foodscarcity", "imgs/scarcity.png", 1, 2));
+	    buttons.add(new Sprite("mutation", "imgs/mutation.png", 1, 2));
 	    buttons.add(new Sprite("exit", "imgs/exit.png", 1, 2));
 	    buttons.add(new Sprite("pointer", "imgs/pointer.png", 1, 2));
             initMenu();
@@ -41,12 +42,19 @@ public class Menu{
     	for( int x = 0; x < buttons.size() ; x++){
 
             //they are a little big, half the size
-            buttons.get(x).setWH( buttons.get(x).getWidth()/2, buttons.get(x).getHeight() / 2);
-
-             //sets the positions relativley to the screen, draws them a little apart also to avoid pointer clicking two at once, that distance is calculated relativley
-             buttons.get(x).setXY( (WIDTH/2) - (buttons.get(x).getWidth()/2), HEIGHT/40 + (buttons.get(x).getHeight() + HEIGHT/17 ) * (1 + x) );
-
+            buttons.get(x).setWH( buttons.get(x).getWidth()/2, buttons.get(x).getHeight() / 2);	 
     	}
+
+	//given up setting the buttons relitivley, im going to do it manually instead
+	buttons.get(0).setXY( (WIDTH/2) - (buttons.get(0).getWidth()/2), 50);
+        buttons.get(2).setXY( (WIDTH/2) - (buttons.get(2).getWidth()/2), 130);
+        buttons.get(3).setXY( (WIDTH/2) - (buttons.get(3).getWidth()/2), 170);
+        buttons.get(4).setXY( (WIDTH/2) - (buttons.get(4).getWidth()/2), 210);
+	buttons.get(5).setXY( (WIDTH/2) - (buttons.get(5).getWidth()/2), 250);
+	buttons.get(6).setXY( (WIDTH/2) - (buttons.get(6).getWidth()/2), 310);
+	buttons.get(7).setXY( (WIDTH/2) - (buttons.get(7).getWidth()/2), 350);	
+	buttons.get(8).setXY( (WIDTH/2) - (buttons.get(8).getWidth()/2), 480);
+	buttons.get(1).setXY( (WIDTH/2) - (buttons.get(1).getWidth()/2), 380);
 
     }
 
@@ -85,7 +93,7 @@ public class Menu{
                     }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("breeding")){
 
                         return 4;
-                    }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("mature")){
+                    }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("hungry")){
 
                         return 5;
                     }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("maptype")){
@@ -97,6 +105,9 @@ public class Menu{
                     }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("foodscarcity")){
 
                         return 8;
+                    }else  if( buttons.get(x).getName().equals("pointer") && buttons.get(y).getName().equals("mutation")){
+
+                        return 9;
                     }
                 }
             }

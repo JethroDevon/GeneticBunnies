@@ -31,7 +31,7 @@ import javax.imageio.ImageIO;
 public class Game extends Canvas implements Runnable{
 
     //screen size variables initialised in constructor
-    private int WIDTH, HEIGHT, mouseX, mouseY, maptype = 3, foodscarcity;
+    private int WIDTH, HEIGHT, mouseX, mouseY, maptype = 3, foodscarcity, mutationrate = 20;
 
     //thses two objects are the key lelements of the clipping blitting method
     private BufferStrategy bs;
@@ -48,8 +48,10 @@ public class Game extends Canvas implements Runnable{
     Graphs BunnyLifeTime, WaterConsumption, FoodConsumption, ThirstDeaths, HungerDeaths, TotalLife, TotalMaturities, Births, SocialGene, GestationGene, HungerGene, ThirstyGene;
 
     //flag to end menu options
-    boolean startFlag, menu, credits, simulation, L, H, T, F, X, M, B, random, genetic, breeding, mature;
+    boolean startFlag, menu, credits, simulation, L, H, T, F, X, M, B, random, genetic = true, breeding, hungry;
 
+    String foodstring = "scarce", mapstring = "Bunny Island! :D";
+    
     //this stores the last up down left or right arrow to be pressed   //as lUP, lDown, lRight, lLeft,
     //or if the arrows are activley being pressed it stores
     //UP DOWN LEFT or RIGHT
@@ -163,25 +165,25 @@ public class Game extends Canvas implements Runnable{
 	
 	if (round < 2) {
 
-	    graphics.drawString( "Graphs available after", WIDTH - 150, 100);
-	    graphics.drawString( "round 2", WIDTH - 130, 113);
+	    graphics.drawString( "Graphs Available After", WIDTH - 150, 100);
+	    graphics.drawString( "Round 2", WIDTH - 130, 113);
 	}else{
 
 	    graphics.drawString( "Press L F T H X M B", WIDTH - 150, 100);
-	    graphics.drawString( "for graphs", WIDTH - 130, 113);
+	    graphics.drawString( "for Graphs", WIDTH - 130, 113);
 	}
 	
-        graphics.drawString( "Press numbers 1 - 9", WIDTH - 150, 135);
-	graphics.drawString( "Bunny vision fields", WIDTH - 145, 147);
-        graphics.drawString( "Breeding mode Stock " + bmanager.breedingstock.size() + " /16 ", WIDTH - 165, 170);
-	graphics.drawString( "Hit ESC for menu", WIDTH - 140, 230);
+        graphics.drawString( "Click on Bunny to see", WIDTH - 150, 135);
+	graphics.drawString( "Bunny Vision Fields", WIDTH - 145, 147);
+        graphics.drawString( "Breeding Mode Stock " + bmanager.breedingstock.size() + " /16 ", WIDTH - 165, 170);
+	graphics.drawString( "Hit ESC for Menu", WIDTH - 140, 230);
 
 	//draw display
 	tiles.drawGrid(graphics);
         tiles.showFood(graphics, bmanager.bunnyswarm, bmanager.deadbunnies);
 
 	//draw mouse
-	graphics.drawImage( options.buttons.get(8).getFrame(), mouseX, mouseY, 20,20, null);
+	graphics.drawImage( options.buttons.get(9).getFrame(), mouseX, mouseY, 20,20, null);
 	
 	//starts a new game after recording importand bunny data
 	if( bmanager.bunnyFunctions(tiles.tiles, graphics)){
@@ -197,15 +199,15 @@ public class Game extends Canvas implements Runnable{
 	    TotalMaturities.addEntry( bmanager.totalMaturities());
 	    Births.addEntry( bmanager.totalBirths());
 
-	    if( !breeding && !mature){
+	    if( !breeding && !hungry){
 
-		bmanager = new BunnyManager( bmanager, tiles.tiles, 30);
-	    }else if(breeding && !mature){
+		bmanager = new BunnyManager( bmanager, tiles.tiles, mutationrate);
+	    }else if(breeding && !hungry){
 		
-		bmanager = new BunnyManager( bmanager, tiles.tiles, 30, true);
-	    }else if( !breeding && mature){
+		bmanager = new BunnyManager( bmanager, tiles.tiles, mutationrate, true);
+	    }else if( !breeding && hungry){
 
-	        bmanager = new BunnyManager( bmanager, tiles.tiles, 30, 1);
+	        bmanager = new BunnyManager( bmanager, tiles.tiles, mutationrate, 1);
 	    }
 	    round ++;
 	    
@@ -235,7 +237,7 @@ public class Game extends Canvas implements Runnable{
 
 	    FoodConsumption.drawGraph( graphics);
 	}
-	if (direction == "JUMP" || X) {
+	if (X) {
 
 	    TotalLife.drawGraph( graphics);
 	}
@@ -289,7 +291,8 @@ public class Game extends Canvas implements Runnable{
 
             //draws the menu buttons
             options.drawMenu( graphics);
-
+	    graphics.drawString( " Random: " + random + ", Genetic: " + genetic + ", Breeding: " + breeding + ", Hungry: " + hungry, 220, 300);
+	    graphics.drawString( " Food Scarcity: " + foodstring + ", Map Type: " + mapstring + ", Mutation Rate: " + mutationrate, 190, 450);
             //shows image from buffer
             bs.show();
 
@@ -420,7 +423,7 @@ public class Game extends Canvas implements Runnable{
                 random = true;
 	    	genetic = false;
 	    	breeding = false;
-		mature = false;
+		hungry = false;
                 System.out.println( "Random Bunnies");
             }
 	    else if( options.getButton() == 3 && startFlag){
@@ -428,22 +431,22 @@ public class Game extends Canvas implements Runnable{
                 random = false;
 	    	genetic = true;
 	    	breeding = false;
-		mature = false;
+		hungry = false;
                 System.out.println( "Genetic Bunnies");
             }else if( options.getButton() == 4 && startFlag){
 
                 random = false;
 	    	genetic = false;
 	    	breeding = true;
-		mature = false;
+		hungry = false;
                 System.out.println( "Breeding Bunnies");
             }else if( options.getButton() == 5 && startFlag){
 
                 random = false;
 	    	genetic = false;
 	    	breeding = false;
-		mature = true;
-                System.out.println( "Mature Bunnies");
+		hungry = true;
+                System.out.println( "Hungry Bunnies");
             }else if( options.getButton() == 6 && startFlag){
 
                 maptype++;
@@ -451,30 +454,32 @@ public class Game extends Canvas implements Runnable{
 	        switch(maptype){
 		case 0:
 
-		    System.out.println("small watering hole");
+		    mapstring = "small watering hole";
 		    break;
 
 		case 1:
 
-		    System.out.println("small large hole");
+		    mapstring = "large watering hole";
 		    break;
 
 		case 2:
 
-		    System.out.println("two small watering holes");
+		    mapstring = "two watering holes";
 		    break;
 		  
 	        case 3:
 
-		    System.out.println("Bunny Island! :D");
+		    mapstring = "Bunny Island! :D";
 		    break;
 		}
 		    
 		if (maptype > 3) {
 
-		    System.out.println("desert - no good for breeding bunnies");
+		    mapstring = "desert (bad)";
 		    maptype = 0;
 		}
+
+		System.out.println(mapstring);
             }else if(options.getButton() == 7){
 
                 System.out.println("Program deliberatley exited by user.");
@@ -490,43 +495,74 @@ public class Game extends Canvas implements Runnable{
 	        switch(foodscarcity){
 		case 0:
 
-		    System.out.println("scarce - 50 on half the tiles");
+		   
+		    foodstring = "scarce - 50 on half the tiles";
 		    break;
 
 		case 1:
 
-		    System.out.println("50 per tile");
+		    foodstring = "50 per tile";
 		    break;
 
 		case 2:
 
-		    System.out.println("100 per tile");
+		    foodstring = "100 per tile";
 		    break;
 		  
 	        case 3:
 
-		    System.out.println("150 per tile");
+		    foodstring = "150 per tile";
 		    break;
 		 case 4:
 
-		    System.out.println("200 per tile");
+		    foodstring = "200 per tile";
 		    break;
 		 case 5:
 
-		    System.out.println("250 per tile");
+		    foodstring = "250 per tile";
 		    break;
 		 case 6:
 
-		    System.out.println("300 per tile");
+		    foodstring = "300 per tile";
 		    break;
 		}
 		    
 		if (foodscarcity > 6) {
 
-		    System.out.println("scarce, 50 on half the tiles");
+		    foodstring = "scarce, 50 on half the tiles";
 	            foodscarcity = 0;
 		}
+
+		 System.out.println(foodstring);
+            }else if( options.getButton() == 9 && startFlag){
+
+                mutationrate += 5;
+	      		    
+		if (mutationrate > 70) {
+		    
+	            mutationrate = 1;
+		}
+
+		System.out.println("mutation rate " + mutationrate);
             }
+
+	    if( !startFlag){
+
+		for (int i = 0; i < bmanager.bunnyswarm.size(); i++) {
+
+		    if ( options.buttons.get(9).circularCollision( bmanager.bunnyswarm.get(i), 100)) {
+
+			if ( bmanager.bunnyswarm.get(i).selected) {
+
+			    bmanager.bunnyswarm.get(i).selected = false;
+			}else{
+
+			    bmanager.bunnyswarm.get(i).selected = true;
+			}
+			break;
+		    }
+		}
+	    }
         }
 
         public void mouseEntered(MouseEvent e) {
@@ -582,157 +618,7 @@ public class Game extends Canvas implements Runnable{
 
                 int keyCode = e.getKeyCode();
 
-                switch( keyCode ) {
-
-		case KeyEvent.VK_0:
-
-		    if( bmanager.checkBunnyID(0)){
-
-			if( bmanager.bunnyswarm.get(0).selected){
-
-			    bmanager.bunnyswarm.get(0).selected = false;
-			}else{
-
-			    bmanager.bunnyswarm.get(0).selected = true;
-			}
-		    }
-
-		    break;
-		    
-		case KeyEvent.VK_1:
-
-		    if( bmanager.checkBunnyID(1)){
-
-			if( bmanager.bunnyswarm.get(1).selected){
-
-			    bmanager.bunnyswarm.get(1).selected = false;
-			}else{
-
-			    bmanager.bunnyswarm.get(1).selected = true;
-			}
-		    }
-
-		    break;
-
-		case KeyEvent.VK_2:
-
-		    if( bmanager.checkBunnyID(2)){
-
-			if( bmanager.bunnyswarm.get(2).selected){
-
-			    bmanager.bunnyswarm.get(2).selected = false;
-			}else{
-
-			    bmanager.bunnyswarm.get(2).selected = true;
-			}
-		    }
-
-		    break;
-
-		case KeyEvent.VK_3:
-
-		    if( bmanager.checkBunnyID(3)){
-
-			if( bmanager.bunnyswarm.get(3).selected){
-
-			    bmanager.bunnyswarm.get(3).selected = false;
-			}else{
-
-			    bmanager.bunnyswarm.get(3).selected = true;
-			}
-		    }
-
-		    break;
-
-		case KeyEvent.VK_4:
-
-		    if( bmanager.checkBunnyID(4)){
-
-			if( bmanager.bunnyswarm.get(4).selected){
-
-			    bmanager.bunnyswarm.get(4).selected = false;
-			}else{
-
-			    bmanager.bunnyswarm.get(4).selected = true;
-			}
-		    }
-
-		    break;
-
-		case KeyEvent.VK_5:
-
-		    if( bmanager.checkBunnyID(5)){
-
-			if( bmanager.bunnyswarm.get(5).selected){
-
-			    bmanager.bunnyswarm.get(5).selected = false;
-			}else{
-
-			    bmanager.bunnyswarm.get(5).selected = true;
-			}
-		    }
-
-		    break;
-
-		case KeyEvent.VK_6:
-
-		    if( bmanager.checkBunnyID(6)){
-
-			if( bmanager.bunnyswarm.get(6).selected){
-
-			    bmanager.bunnyswarm.get(6).selected = false;
-			}else{
-
-			    bmanager.bunnyswarm.get(6).selected = true;
-			}
-		    }
-
-		    break;
-
-		case KeyEvent.VK_7:
-
-		    if( bmanager.checkBunnyID(7)){
-
-			if( bmanager.bunnyswarm.get(7).selected){
-
-			    bmanager.bunnyswarm.get(7).selected = false;
-			}else{
-
-			    bmanager.bunnyswarm.get(7).selected = true;
-			}
-		    }
-
-		    break;
-
-		case KeyEvent.VK_8:
-
-		    if( bmanager.checkBunnyID(8)){
-
-			if( bmanager.bunnyswarm.get(8).selected){
-
-			    bmanager.bunnyswarm.get(8).selected = false;
-			}else{
-
-			    bmanager.bunnyswarm.get(8).selected = true;
-			}
-		    }
-
-		    break;
-
-		case KeyEvent.VK_9:
-
-		    if( bmanager.checkBunnyID(9)){
-
-			if( bmanager.bunnyswarm.get(9).selected){
-
-			    bmanager.bunnyswarm.get(9).selected = false;
-			}else{
-
-			    bmanager.bunnyswarm.get(9).selected = true;
-			}
-		    }
-
-		    break;
+                switch( keyCode ) {      
 
 		case KeyEvent.VK_F:
 

@@ -53,7 +53,7 @@ class BunnyManager{
             }
         }catch( Exception e){
 
-            System.out.println(" bunny manager constructor has failed: " + e.toString());
+            System.out.println(" Random Bunny manager constructor has failed: " + e.toString());
 	}
 
 	bun_tracker = bunnyswarm.size()+1;
@@ -138,52 +138,53 @@ class BunnyManager{
 	    int bunnynum = bunnyswarm.size() + 1;
 
 	   
-		if( bunnyswarm.size() < 16){
+	    if( bunnyswarm.size() < 16){
 		
-		    //elite bunnies but with a much higher mutation rate
-		    for (int i = 0; i < 4; i++) {
-			for (int a = 0; a < 4; a++) {
+		//elite bunnies but with a much higher mutation rate
+		for (int i = 0; i < 4; i++) {
+		    for (int a = 0; a < 4; a++) {
 			
-			    bunnyswarm.add(new Bunny( bunnynum, bunnyswarm.get(i), bunnyswarm.get(a), WIDTH, HEIGHT, map, mutationrate * 4));
-			    bunnynum++;
-			}
-		    }	  
-		}
+			bunnyswarm.add(new Bunny( bunnynum, bunnyswarm.get(i), bunnyswarm.get(a), WIDTH, HEIGHT, map, mutationrate * 4));
+			bunnynum++;
+		    }
+		}	  
+	    }
 
-		//must remove identialcal bunnies
-		for (int i = 0; i < bunnyswarm.size(); i++) {
-		    for (int q = 0; q < bunnyswarm.size(); q++) {
-			if (i != q) {
-			    if ( compareArray( bunnyswarm.get(i).option_chromosome, bunnyswarm.get(q).option_chromosome) &&
-				 compare2DArray(  bunnyswarm.get(i).vision_chromosome,  bunnyswarm.get(q).vision_chromosome)) {
+	    //must remove identialcal bunnies
+	    for (int i = 0; i < bunnyswarm.size(); i++) {
+		for (int q = 0; q < bunnyswarm.size(); q++) {
+		    if (i != q) {
+			if ( compareArray( bunnyswarm.get(i).option_chromosome, bunnyswarm.get(q).option_chromosome) &&
+			     compare2DArray(  bunnyswarm.get(i).vision_chromosome,  bunnyswarm.get(q).vision_chromosome)) {
 
-				//  System.out.println("Duplicate bunny "+ bunnyswarm.get(q).bunnyID +" removed");
-				bunnyswarm.remove(q);
-			    }			
-			}
+			    //  System.out.println("Duplicate bunny "+ bunnyswarm.get(q).bunnyID +" removed");
+			    bunnyswarm.remove(q);
+			}			
 		    }
 		}
+	    }
 	    
 
 	    //top up with random bunnies
 	    while( bunnyswarm.size() < 16){
 
 		bunnyswarm.add( new Bunny( bunnyswarm.size(), WIDTH, HEIGHT, map));
-		  bunnyswarm.get( bunnyswarm.size()-1).alive = true;
+		bunnyswarm.get( bunnyswarm.size()-1).alive = true;
 	    }
 
 	    /*/neuter all bunnies
-	    for (int i = 0; i < bunnyswarm.size(); i++) {
+	      for (int i = 0; i < bunnyswarm.size(); i++) {
 
-		bunnyswarm.get(i).canbreed = false;
-	    }
+	      bunnyswarm.get(i).canbreed = false;
+	      }
 	    */
 	  
 	    bun_tracker = bunnyswarm.size();
 	   	  
 	}catch(Exception e){
 
-	    System.out.println(" Bunny manager failed: " + e.toString());
+	    System.out.println(" Genetic Bunny manager failed: " + e.toString());
+	    e.printStackTrace(System.out);
 	}
     }
 
@@ -317,32 +318,31 @@ class BunnyManager{
 	try{
 	 
 
-	    	//this creates four bunnies from previous best bunnies by getting the best deadbunnies
-		//by their IDs and popping them out the deadbunnies array	    
-	        Bunny Elitemother = popPastDeadBunny( bestPastFoodConsumptionID());
-		Bunny Elitefather = popPastDeadBunny( bestPastFoodConsumptionID());
+	    //this creates four bunnies from previous best bunnies by getting the best deadbunnies
+	    //by their IDs and popping them out the deadbunnies array	    
+	    Bunny Elitemother = popPastDeadBunny( bestPastFoodConsumptionID());
+	    Bunny Elitefather = popPastDeadBunny( bestPastFoodConsumptionID());
 	    
-		bunnyswarm.add(new Bunny( bunnyswarm.size(), Elitemother, Elitefather, WIDTH, HEIGHT, map, mutationrate));
-		bunnyswarm.add(new Bunny( bunnyswarm.size(), Elitefather, Elitemother, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( bunnyswarm.size(), Elitemother, Elitefather, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( bunnyswarm.size(), Elitefather, Elitemother, WIDTH, HEIGHT, map, mutationrate));
 	  
-		Bunny mother = popPastDeadBunny( bestPastFoodConsumptionID());
-		Bunny father = popPastDeadBunny( bestPastFoodConsumptionID());
+	    Bunny mother = popPastDeadBunny( bestPastFoodConsumptionID());
+	    Bunny father = popPastDeadBunny( bestPastFoodConsumptionID());
 
-		bunnyswarm.add(new Bunny( bunnyswarm.size(), mother, father, WIDTH, HEIGHT, map, mutationrate));
-		bunnyswarm.add(new Bunny( bunnyswarm.size(), father, mother, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( bunnyswarm.size(), mother, father, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( bunnyswarm.size(), father, mother, WIDTH, HEIGHT, map, mutationrate));
 
-		mother = popPastDeadBunny( bestPastFoodConsumptionID());
-		father = popPastDeadBunny( bestPastFoodConsumptionID());
+	    mother = popPastDeadBunny( bestPastFoodConsumptionID());
+	    father = popPastDeadBunny( bestPastFoodConsumptionID());
 
-		bunnyswarm.add(new Bunny( bunnyswarm.size(), mother, father, WIDTH, HEIGHT, map, mutationrate));
-		bunnyswarm.add(new Bunny( bunnyswarm.size(), father, mother, WIDTH, HEIGHT, map, mutationrate));
-
+	    bunnyswarm.add(new Bunny( bunnyswarm.size(), mother, father, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( bunnyswarm.size(), father, mother, WIDTH, HEIGHT, map, mutationrate));
 		
-		mother = popPastDeadBunny( bestPastFoodConsumptionID());
-		father = popPastDeadBunny( bestPastFoodConsumptionID());
+	    mother = popPastDeadBunny( bestPastFoodConsumptionID());
+	    father = popPastDeadBunny( bestPastFoodConsumptionID());
 
-		bunnyswarm.add(new Bunny( bunnyswarm.size(), mother, father, WIDTH, HEIGHT, map, mutationrate));
-		bunnyswarm.add(new Bunny( bunnyswarm.size(), father, mother, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( bunnyswarm.size(), mother, father, WIDTH, HEIGHT, map, mutationrate));
+	    bunnyswarm.add(new Bunny( bunnyswarm.size(), father, mother, WIDTH, HEIGHT, map, mutationrate));
 
 	    
 	    	   	 
@@ -361,7 +361,7 @@ class BunnyManager{
 		    }	  
 		}
 
-		//must remove identialcal bunnies
+		//must remove identical bunnies
 		for (int i = 0; i < bunnyswarm.size(); i++) {
 		    for (int q = 0; q < bunnyswarm.size(); q++) {
 			if (i != q) {
@@ -380,19 +380,19 @@ class BunnyManager{
 	   	  
 	}catch(Exception e){
 
-	    System.out.println(" Maturity Bunny manager failed: " + e.toString());
+	    System.out.println(" Hungry Bunny manager failed: " + e.toString());
 	}
     }
 
 
     boolean compareArray(int[] A, int[] B){
 
-	if ( A.length != B.length) {
+	if ( A.length-1 != B.length-1) {
 
 	    return false;
 	}
 
-	for (int i = 0; i < A.length; i++) {
+	for (int i = 0; i < A.length-1; i++) {
 
 	    if (A[i]!=B[i]) {
 
@@ -489,22 +489,6 @@ class BunnyManager{
 
 	    return bun.getPosY();
 	}
-    }
-
-    //checks if a bun is off grid
-    boolean offGrid( Bunny bun, Tile[][] tiles){
-
-	for (int x = 0; x < tiles.length; x++) {
-	    for (int y = 0; y < tiles[x].length; y++) {
-
-		if( bun.checkCollision( tiles[x][y])){
-
-		    return false;
-		}
-	    }
-	}
-
-	return true;
     }
 
     //returns total amount of food consumed that round
@@ -759,10 +743,37 @@ class BunnyManager{
 	return false;
     }
 
+    public void drawFields( Graphics g){
+
+	for (int i = 0; i < bunnyswarm.size(); i++) {
+
+	    if (bunnyswarm.get(i).selected) {
+
+		bunnyswarm.get(i).showVision( g);
+	    }
+	}
+    }
+
     //draws individual bunny
     public void drawBunny( Graphics g, Bunny barry){
 
 	g.drawImage( barry.nextFrame(), barry.getPosX(), barry.getPosY(), barry.getWidth(), barry.getHeight(), null);
+    }
+
+    //checks if a bun is off grid
+    boolean offGrid( Bunny bun, Tile[][] tiles){
+
+	for (int x = 0; x < tiles.length; x++) {
+	    for (int y = 0; y < tiles[x].length; y++) {
+
+		if( bun.checkCollision( tiles[x][y])){
+		    
+		    return false;
+		}
+	    }
+	}
+
+	return true;
     }
 
     //calls all vital bunny functions returns true when all bunnies are dead
@@ -773,11 +784,11 @@ class BunnyManager{
 	
 	try{
 
-	    //makes sure  that each bunny doesnt wonder into the space between worlds
-	    int n = bunnyswarm.size();
-	    for (int i = 0; i < n; i++) {
+	    //makes sure  that each bunny doesnt wonder into the space between worlds	    
+	    for (int i = 0; i < bunnyswarm.size(); i++) {
 
-			if( offGrid(bunnyswarm.get(i), tiles)){
+		if( offGrid( bunnyswarm.get(i), tiles)){
+
 		    if( finitespace){
 
 			bunnyswarm.get(i).setAngle( returnBunny( bunnyswarm.get(i)));
@@ -809,10 +820,10 @@ class BunnyManager{
 		}
 
 	        bunnyswarm.get(i).updateVision( tiles);
+		drawFields(g);	     
 		bunnyswarm.get(i).priorities( bunnyswarm);	
 		bunnyswarm.get(i).pollConditions("ANGLE");
-		bunnyswarm.get(i).displayState(g);
-		bunnyswarm.get(i).showVision( g, tiles);	      	      
+		bunnyswarm.get(i).displayState(g);		 	      
 		bunnyswarm.get(i).moveSprite();
 	        drawBunny( g, bunnyswarm.get(i));
 		bunnyswarm.get(i).nearestBunny = assignNearest( bunnyswarm.get(i));
@@ -835,10 +846,10 @@ class BunnyManager{
 		    //put that bunny nearby where it gave birth
 		    bunnyswarm.get(  bunnyswarm.size()-1).setXY( bunnyswarm.get(i).getPosX(), bunnyswarm.get(i).getPosY());
 
-		    bunnyswarm.get(  bunnyswarm.size()-1).hunger = bunnyswarm.get(i).fat;
+		    //give the bunny the weight that the mother saved, this will create longer lived bunnies
+		    bunnyswarm.get(  bunnyswarm.size()-1).hunger += bunnyswarm.get(i).fat;
 		    bunnyswarm.get(i).fat = 0;
 
-		    bunnyswarm.get(  bunnyswarm.size()-1).generation++;
 		    System.out.print(bunnyswarm.get(  bunnyswarm.size()-1).bunnyID + "B!-");
 		    
 		}
@@ -858,7 +869,8 @@ class BunnyManager{
 	    }
 	}catch( Exception e){
 
-          
+	    // System.out.println( e.toString());
+	    e.printStackTrace(System.out);
 	}
 
 	if( bunnyswarm.size() == 0){

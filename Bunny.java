@@ -657,7 +657,7 @@ class Bunny extends Sprite{
 	    if (nearestBunny == null || concentration > 80) {
 
 		cycles = 0;
-		goTo( targets.get(gen.nextInt(8)));
+		goTo( targets.get(gen.nextInt(targets.size())));
 	    }else{
 
 		if(circularCollision( nearestBunny, socialness)) {
@@ -784,7 +784,7 @@ class Bunny extends Sprite{
 	//draws a rectangle over the location the bunny is trying to get to if it is trying to get somewhere
 	if(choice != null){
 
-	    g.drawRect(choice.getPosX(), choice.getPosY(), 40, 40);
+	    g.drawRect(choice.getPosX()+5, choice.getPosY()+5, bx/10 -10, by/10 -10);
 	}
     }
 
@@ -875,26 +875,14 @@ class Bunny extends Sprite{
 	return false;
     }
 
-    public void showVision(Graphics g, Tile[][] map){
+    public void showVision( Graphics g){
 
 	if( selected){
 
 	    g.setColor(Color.RED);
-	    for (int i = 0; i < kernel.length; i++) {
+	    for (int i = 0; i < targets.size(); i++) {
 
-		//Bunny Vision X or Y to find which tiles the bunny can see
-		int bvx = collidingTile.xtile + kernel[i][0];
-		int bvy = collidingTile.ytile + kernel[i][1];
-
-		for (int x = 0; x < map.length; x++) {
-		    for (int y = 0; y < map[x].length; y++) {
-
-			if( map[x][y].xtile == bvx && map[x][y].ytile == bvy){
-
-			    g.drawRect( map[x][y].getPosX(), map[x][y].getPosY(), map[x][y].getWidth(), map[x][y].getHeight());
-			}
-		    }
-		}
+		g.drawRect( targets.get(i).getPosX()+10, targets.get(i).getPosY()+10, bx/10 -20, by/10 -20);
 	    }
 	}
     }
