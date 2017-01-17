@@ -273,7 +273,7 @@ class Bunny extends Sprite{
 
     int getExperimentalGene( int g){
 
-        int temp;
+        int temp= 0;
 
         for (int i = 0; i < option_chromosome_exp[g].length; i++) {
 
@@ -463,7 +463,7 @@ class Bunny extends Sprite{
         return temp;
     }
 
-    int [][] optionChildrenDouble_Exp( Bunny mother, Bunny father, int mutationrate){
+    /* int [][] optionChildrenDouble_Exp( Bunny mother, Bunny father, int mutationrate){
 
         int[] temp = new int[10][8];
 
@@ -482,6 +482,7 @@ class Bunny extends Sprite{
             temp[i] = father.option_chromosome[i];
         }
     }
+    */
 
     //this function is essentially the bunnies vision, anything in its field of view
     //it will be given a choice of what to go for

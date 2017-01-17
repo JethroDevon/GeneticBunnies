@@ -66,6 +66,7 @@ class BunnyManager{
 	lastBM = bm;
 	mutationrate = _mutationrate;
 	map = _map;
+	breedingstock = lastBM.breedingstock;
 
 	//enables or disables breeding
 	breeding = false;
@@ -198,6 +199,7 @@ class BunnyManager{
 
 	//enables or disables breeding
 	breeding = _breeding;
+        breedingstock = lastBM.breedingstock;
 	
 	//avoid having a linked list going on too long
 	lastBM.lastBM = null;
@@ -206,28 +208,35 @@ class BunnyManager{
 	WIDTH = bm.WIDTH;
 	HEIGHT = bm.HEIGHT;
 
-	//accumulate breeding stock for breeding bunnies mode
-	for (int i = 0; i < lastBM.deadbunnies.size(); i++) {
+            //accumulate breeding stock for breeding bunnies mode
+	    for (int i = 0; i < lastBM.deadbunnies.size(); i++) {
 
-	    if (lastBM.deadbunnies.get(i).births > 0) {
+		if (lastBM.deadbunnies.get(i).births > 0) {
 
-		breedingstock.add( lastBM.deadbunnies.get(i));
+		    breedingstock.add( lastBM.deadbunnies.get(i));
+		}
+	    }	
+
+	    //get rid of the ealiest bunny that has birthed the least amount of times from the
+	    //breeding stock list
+	    while( breedingstock.size() > 16){
+
+		int temp = 999;
+		int bun;
+		
+		for (int i = 0; i < breedingstock.size(); i++) {
+
+		    if ( temp > breedingstock.get(i).births) {
+
+			temp = breedingstock.get(i).births;
+			bun = i;
+		    }
+		}
 	    }
-	}	
-
-	//accumulate breeding stock for breeding bunnies mode
-	for (int i = 0; i < lastBM.deadbunnies.size(); i++) {
-
-	    if (lastBM.deadbunnies.get(i).births > 0) {
-
-		breedingstock.add( lastBM.deadbunnies.get(i));
-	    }
-	}
      
-	//the following block is written in an ugly scripted way because a lot of experimentation goes on here
 	try{
 
-	    if (breedingstock.size() < 16) {
+	    if (breedingstock.size() < 16){
 
 		breederstage = true;
 		for (int i = breedingstock.size(); i < 16; i++) {
@@ -238,32 +247,16 @@ class BunnyManager{
 
 		//can get on with creating variants of all the bunnies that succeeded in breeding
 		breederstage = false;
-
-		//get rid of the ealiest bunny that has birthed the least amount of times from the
-		//breeding stock list
-		while( breedingstock.size() > 16){
-
-		    int temp = 999;
-		    int bun;
-		
-		    for (int i = 0; i < breedingstock.size(); i++) {
-
-			if ( temp > breedingstock.get(i).births) {
-
-			    temp = breedingstock.get(i).births;
-			    bun = i;
-			}
-		    }
-		}
-	    }	   
-
+	        bunnyswarm = breedingstock;
+	    }
+	   
 	    //these bunnies are based on past best bunnies that have lived and died before so they must be bought back to life
 	    for (int i = 0; i < bunnyswarm.size(); i++) {
 
 		bunnyswarm.get(i).alive = true;
 	    }
 	
-	    bun_tracker = bunnyswarm.size()+1;
+	    bun_tracker = bunnyswarm.size()-1;
 	   	  
 	}catch(Exception e){
 
@@ -278,6 +271,7 @@ class BunnyManager{
 	mutationrate = _mutationrate;
 	map = _map;
 	matRange = _matRange;
+	breedingstock = lastBM.breedingstock;
 	
 	//enables or disables breeding
 	breeding = true;
@@ -605,7 +599,8 @@ class BunnyManager{
 
 	    if( lastBM.deadbunnies.get(i).cycles > temp){
 
-		temp = lastBM.deadbunnies.get(i).cycles;
+		//this is was interesting, multiplying food by water has the bunny eating the multiplier more but a little numerator
+		temp = lastBM.deadbunnies.get(i).amountdrank * lastBM.deadbunnies.get(i).totalfoodconsumed ;
 		id = lastBM.deadbunnies.get(i).bunnyID;
 	    }
 	}
@@ -789,6 +784,7 @@ class BunnyManager{
 
 		if( offGrid( bunnyswarm.get(i), tiles)){
 
+		    bunnyswarm.get(i).grazecycles = 100;
 		    if( finitespace){
 
 			bunnyswarm.get(i).setAngle( returnBunny( bunnyswarm.get(i)));

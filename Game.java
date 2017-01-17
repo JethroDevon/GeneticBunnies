@@ -209,6 +209,7 @@ public class Game extends Canvas implements Runnable{
 
 	        bmanager = new BunnyManager( bmanager, tiles.tiles, mutationrate, 1);
 	    }
+	    
 	    round ++;
 	    
 	    try{
