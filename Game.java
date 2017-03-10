@@ -270,7 +270,7 @@ public class Game extends Canvas implements Runnable{
             if(bs == null){
 
                 //two layers to buffer
-                createBufferStrategy(1);
+                createBufferStrategy(3);
 
                 //returns buffer to canvas for draw
                 return;
